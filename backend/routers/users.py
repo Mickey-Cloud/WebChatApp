@@ -20,12 +20,12 @@ def get_users(
 ):
     """Get a collection of users."""
 
-    sort_key = lambda animal: getattr(animal, sort)
-    animals = db.get_all_users()
+    sort_key = lambda user: getattr(user, sort)
+    users = db.get_all_users()
 
     return UserCollection(
-        meta={"count": len(animals)},
-        animals=sorted(animals, key=sort_key),
+        meta={"count": len(users)},
+        users=sorted(users, key=sort_key),
     )
 
 #need to add duplicate entity option
