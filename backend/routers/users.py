@@ -8,6 +8,7 @@ from backend.entities import(
     User,
     UserCreate,
     UserCollection,
+    ChatCollection
 )
 from backend import database as db
 
@@ -30,16 +31,10 @@ def get_users(
 
 #need to add duplicate entity option
 @users_router.post("", response_model=User)
-def create_user():
+def create_user(user_create: UserCreate):
     """Creates a new user in the database if the ID doesn't match an already created user"""
-
-    user = UserCreate(
-    id=uuid4().hex,
-    )
-    usr = db.create_user(user)
-    return User(
-        usr.model_dump()
-    )
+    
+    return db.create_user(user_create)
 
 
 @users_router.get("/{user_id}", response_model=User)
@@ -48,6 +43,7 @@ def get_user(user_id: str):
     
     return db.get_user_by_id(user_id)
 
-@users_router.get("/{user_id}/chats")
+@users_router.get("/{user_id}/chats", response_model=ChatCollection)
 def get_user_chats(user_id: str):
-    pass
+    
+    return db.get_user_chats(user_id)
