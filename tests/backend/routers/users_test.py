@@ -75,7 +75,6 @@ def test_get_user_dne():
             "entity_id": userId
         }
     }
-    
 
 def test_get_user_chats():
     client = TestClient(app)
@@ -101,4 +100,3 @@ def test_user_dne_get_user_chats():
     }
 
 
-# --------------------- Chat Tests ------------------------ #

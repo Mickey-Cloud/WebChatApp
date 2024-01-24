@@ -44,6 +44,14 @@ def get_user(user_id: str):
     return db.get_user_by_id(user_id)
 
 @users_router.get("/{user_id}/chats", response_model=ChatCollection)
-def get_user_chats(user_id: str):
+def get_user_chats(
+    user_id: str,
+    sort: Literal["name", "id", "created_at"] = "name"
+    ):
     
-    return db.get_user_chats(user_id)
+    sort_key = lambda chat: getattr(chat, sort)
+    chats = db.get_user_chats(user_id)
+    return ChatCollection(
+        meta={"count": len(chats)},
+        chats=sorted(chats, key=sort_key),
+    )
