@@ -51,6 +51,7 @@ def get_user_chats(
     user_id: str,
     sort: Literal["name", "id", "created_at"] = "name"
     ):
+    """Gets all the chats pertaining to a specific user"""
     
     sort_key = lambda chat: getattr(chat, sort)
     chats = db.get_user_chats(user_id)

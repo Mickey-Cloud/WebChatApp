@@ -21,6 +21,7 @@ chats_router = APIRouter(prefix="/chats", tags=["Chats"])
 def get_chats(
     sort: Literal["name", "id", "created_at"] = "name"
     ):
+    """Gets all the chats"""
     
     sort_key = lambda chat: getattr(chat, sort)
     chats = db.get_chats()
@@ -64,6 +65,7 @@ def get_chat_messages(
     chat_id: str,
     sort: Literal["id", "user_id", "created_at"] = "created_at"
     ):
+    """Gets all the messages pertaining to a specific Chat"""
     
     sort_key = lambda message: getattr(message, sort)
     messages = db.get_messages_by_chat_id(chat_id)
@@ -77,6 +79,7 @@ def get_user_fosters(
     chat_id: str,
     sort: Literal["id", "created_at"] = "id",
     ):
+    """Gets all the Users associated with the specific chat"""
     
     sort_key = lambda user: getattr(user, sort)
     users = db.get_chat_users(chat_id)
