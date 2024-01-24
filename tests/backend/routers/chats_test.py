@@ -25,7 +25,7 @@ def test_get_chat():
     assert response.status_code == 200
     
     user = response.json()
-    assert user['id'] == chatId
+    assert user['chat']['id'] == chatId
 
 def test_get_chat_dne():
     client = TestClient(app)
@@ -65,14 +65,14 @@ def test_put_chat():
     response = client.put(f"/chats/{chatId}", json=create_params)
     assert response.status_code == 200
     
-    chat = response.json()
+    chat = response.json()['chat']
     for key, value in create_params.items():
         assert chat[key] == value
     
     response = client.get(f"/chats/{chatId}")
     assert response.status_code == 200
     
-    chat = response.json()
+    chat = response.json()['chat']
     for key, value in create_params.items():
         assert chat[key] == value
 

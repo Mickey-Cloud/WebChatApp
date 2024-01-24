@@ -23,13 +23,13 @@ def test_create_user():
     response = client.post("/users", json=create_params)
     
     assert response.status_code == 200
-    user = response.json()
+    user = response.json()['user']
     for key, value in create_params.items():
         assert user[key] == value
         
     response = client.get(f"/users/{user['id']}")
     assert response.status_code == 200
-    user = response.json()
+    user = response.json()['user']
     for key, value in create_params.items():
         assert user[key] == value
 
@@ -38,7 +38,7 @@ def test_create_duplicate_user():
     userId = "burke"
     response = client.get(f"/users/{userId}")
     assert response.status_code == 200
-    user = response.json()
+    user = response.json()['user']
     
     create_params = {
         "id": f"{user['id']}",
@@ -60,7 +60,7 @@ def test_get_user():
     response = client.get(f"/users/{userId}")
     assert response.status_code == 200
     
-    user = response.json()
+    user = response.json()['user']
     assert user['id'] == userId
 
 def test_get_user_dne():
