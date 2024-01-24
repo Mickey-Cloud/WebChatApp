@@ -6,6 +6,7 @@ from fastapi import APIRouter
 
 from backend.entities import(
     User,
+    UserResponse,
     UserCreate,
     UserCollection,
     ChatCollection
@@ -30,18 +31,20 @@ def get_users(
     )
 
 #need to add duplicate entity option
-@users_router.post("", response_model=User)
+@users_router.post("", response_model=UserResponse)
 def create_user(user_create: UserCreate):
     """Creates a new user in the database if the ID doesn't match an already created user"""
     
-    return db.create_user(user_create)
+    return UserResponse(
+        user=db.create_user(user_create))
 
 
-@users_router.get("/{user_id}", response_model=User)
+@users_router.get("/{user_id}", response_model=UserResponse)
 def get_user(user_id: str):
     """Get a user for a given ID."""
     
-    return db.get_user_by_id(user_id)
+    return UserResponse(
+        user=db.get_user_by_id(user_id))
 
 @users_router.get("/{user_id}/chats", response_model=ChatCollection)
 def get_user_chats(

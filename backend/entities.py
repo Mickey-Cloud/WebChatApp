@@ -14,10 +14,11 @@ class User(BaseModel):
 
     id: str
     created_at: datetime
-
+class UserResponse(BaseModel):
+    """Represents the API response for a user Model"""
+    user: User
 class UserCreate(BaseModel):
     """Represents parameters for adding a new user to the system"""
-
     id: str
 
 class UserCollection(BaseModel):
@@ -41,15 +42,16 @@ class MessageCollection(BaseModel):
     messages: list[Message]
 
 # ------------- Chats -------------- #
+
 class Chat(BaseModel):
     """Represents an API response for a chat."""
-
     id: str
     name: str
     user_ids: list[str]
     owner_id: str
     created_at: datetime
-
+class ChatResponse(BaseModel):
+    chat: Chat
 class ChatDB(BaseModel):
     id: str
     name: str

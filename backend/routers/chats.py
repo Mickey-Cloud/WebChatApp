@@ -5,6 +5,7 @@ from fastapi import APIRouter
 
 from backend.entities import (
     Chat,
+    ChatResponse,
     ChatCollection,
     ChatUpdate,
     MessageCollection,
@@ -28,18 +29,20 @@ def get_chats(
         chats=sorted(chats, key=sort_key),
     )
 
-@chats_router.get("/{chat_id}", response_model=Chat)
+@chats_router.get("/{chat_id}", response_model=ChatResponse)
 def get_chat(chat_id: str):
     """Get a chat for a given ID."""
     
-    return db.get_chat_by_id(chat_id)
+    return ChatResponse(
+        chat = db.get_chat_by_id(chat_id))
 
 
-@chats_router.put("/{chat_id}", response_model=Chat)
+@chats_router.put("/{chat_id}", response_model=ChatResponse)
 def update_chat(chat_id: str, chat_update: ChatUpdate):
     """Changes the name of the given chat"""
     
-    return db.put_chat_name_update(chat_id, chat_update)
+    return ChatResponse(
+        chat = db.put_chat_name_update(chat_id, chat_update))
 
 
 @chats_router.delete(
