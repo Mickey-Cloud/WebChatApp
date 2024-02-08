@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from backend.routers.chats import chats_router
 from backend.routers.users import users_router
@@ -13,6 +14,14 @@ app = FastAPI(
 
 app.include_router(chats_router)
 app.include_router(users_router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.exception_handler(EntityNotFoundException)
 def handle_entity_not_found(
