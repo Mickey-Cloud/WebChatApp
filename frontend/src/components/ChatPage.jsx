@@ -4,7 +4,7 @@ import "./ChatPage.css";
 
 function ChatPreview({ chat }) {
     return (
-        <Link className="chat-preview" to={'/chats/${chat.id}'}>
+        <Link className="chat-preview" to={`/chats/${chat.id}`}>
             <div className="chat-name">{chat.name}</div>
             <div className="chat-detail">{chat.user_ids}</div>
             <div className="chat-detail">created at: {chat.created_at}</div>
@@ -25,9 +25,9 @@ function ChatCardWrapper() {
             fetch(`http://127.0.0.1:8000/chats/${chatId}/messages`)
                 .then((response) => {
                     if (!response.ok) {
-                        response.status === 404 ?
+                        /*response.status === 404 ?
                             navigate("/error/404") :
-                            navigate("/error");
+                            navigate("/error");*/
                     }
                     return response.json()
                 })
@@ -38,19 +38,21 @@ function ChatCardWrapper() {
         return <ChatCard chat={{}} />;
     }
 
-    if (data?.chat) {
-        return <ChatCard chat={data.chat} />;
+    if (data?.messages) {
+        return <ChatCard meta={data.meta} messages={data.messages} />;
     }
 
-    return <Navigate to="/error" />;
+    /*return <Navigate to="/error" />;*/
+    return <div> Error hello </div>;
 }
 
-function ChatCard({ chat }) {
+function ChatCard({ meta, messages }) {
     return (
         <div className="chat-card">
-            <h2 className="chat-card-title">{chat.name || "name"}</h2>
+            <h2 className="chat-card-title">Count: {meta.count || "0"}</h2>
             <hr />
-            {                
+            {<div>{"message" || "Messages = 0"}</div>
+            
             }
         </div>
     )
@@ -73,8 +75,8 @@ function MessageCard({ message }){
 
 function EmptyChatList() {
     return <ChatList chats={[0, 1, 2, 3, 4].map(() => ({
-        user_id: "loading...",
-        text: "Text of the message",
+        name: "loading...",
+        user_ids: "Text of the message",
         created_at: "Date - time",
     }))} />
 }
@@ -106,9 +108,9 @@ function ChatPage() {
         ),
     });
 
-    if (error) {
+   /* if (error) {
         return <Navigate to="/error" />
-    }
+    }*/
 
     return (
         <>

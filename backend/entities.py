@@ -50,8 +50,10 @@ class Chat(BaseModel):
     user_ids: list[str]
     owner_id: str
     created_at: datetime
+
 class ChatResponse(BaseModel):
     chat: Chat
+
 class ChatDB(BaseModel):
     id: str
     name: str
