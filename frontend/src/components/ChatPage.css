@@ -1,17 +1,17 @@
-.animals-page {
-  display: grid;
+.chats-page {
+  display: flex;
   grid-template-columns: 1fr 2fr;
   grid-template-rows: 50vh;
   gap: 50px;
 }
 
-.animal-list {
+.chat-list {
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
 }
 
-.animal-preview {
+.chat-preview {
   display: grid;
   grid-template-columns: 3fr 1fr 1fr;
   border: 1px solid white;
@@ -22,34 +22,34 @@
   justify-items: left;
 }
 
-.animal-preview:hover {
+.chat-preview:hover {
   background-color: #444444;
   color: white;
 }
 
-.animal-detail, .animal-name {
+.chat-detail, .chat-name {
   padding: 0 5px;
 }
 
-.animal-detail {
+.chat-detail {
   font-size: x-small;
 }
 
-.animal-name {
+.chat-name {
   font-weight: bolder;
 }
 
-.animal-card {
+.chat-card {
   text-align: left;
   border: 2px solid lightgray;
 }
 
-.animal-card-title {
+.chat-card-title {
   text-align: center;
   margin: 20px 0;
 }
 
-.animal-card-row {
+.chat-card-row {
   padding: 8px 20px;
   display: grid;
   border-bottom: 1px solid lightgray;

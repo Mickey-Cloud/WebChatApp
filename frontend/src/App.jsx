@@ -14,6 +14,7 @@ function App() {
           <Route path="/chats" element={<ChatPage />}>
             <Route path="/chats/:chatId" element={<ChatPage />} />
           </Route>
+          <Route path="/error" element={<div>Error</div>}/>
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>

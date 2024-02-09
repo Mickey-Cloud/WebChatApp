@@ -2,27 +2,27 @@ import { useQuery } from "react-query";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import "./ChatPage.css";
 
-function AnimalPreview({ animal }) {
+function ChatPreview({ chat }) {
     return (
-        <Link className="animal-preview" to={`/animals/${animal.id}`}>
-            <div className="animal-name">{animal.name}</div>
-            <div className="animal-detail">{animal.kind}</div>
-            <div className="animal-detail">{animal.age}</div>
+        <Link className="chat-preview" to={'/chats/${chat.id}'}>
+            <div className="chat-name">{chat.name}</div>
+            <div className="chat-detail">{chat.user_ids}</div>
+            <div className="chat-detail">created at: {chat.created_at}</div>
         </Link>
     );
 }
 
-function AnimalCardWrapper() {
-    const { animalId } = useParams();
-    if (!animalId) {
-        return <AnimalCard animal={{}} />
+function ChatCardWrapper() {
+    const { chatId } = useParams();
+    if (!chatId) {
+        return <ChatCard chat={{}} />
     }
 
     const navigate = useNavigate();
     const { data, isLoading } = useQuery({
-        queryKey: ["animals", animalId],
+        queryKey: ["chats", chatId],
         queryFn: () => (
-            fetch(`http://127.0.0.1:8000/animals/${animalId}`)
+            fetch(`http://127.0.0.1:8000/chats/${chatId}/messages`)
                 .then((response) => {
                     if (!response.ok) {
                         response.status === 404 ?
@@ -35,57 +35,66 @@ function AnimalCardWrapper() {
     });
 
     if (isLoading) {
-        return <AnimalCard animal={{}} />;
+        return <ChatCard chat={{}} />;
     }
 
-    if (data?.animal) {
-        return <AnimalCard animal={data.animal} />;
+    if (data?.chat) {
+        return <ChatCard chat={data.chat} />;
     }
 
     return <Navigate to="/error" />;
 }
 
-function AnimalCard({ animal }) {
+function ChatCard({ chat }) {
     return (
-        <div className="animal-card">
-            <h2 className="animal-card-title">{animal.name || "name"}</h2>
+        <div className="chat-card">
+            <h2 className="chat-card-title">{chat.name || "name"}</h2>
             <hr />
-            {["kind", "age", "intake_date", "fixed", "vaccinated"].map((attr) => (
-                <div key={attr} className="animal-card-row">
-                    <div className="animal-detail-category">{attr}</div>
-                    <div className="animal-detail-value">
-                        {(animal || {})[attr]?.toString() || attr}
+            {                
+            }
+        </div>
+    )
+}
+
+function MessageCard({ message }){
+    return(
+        <div>
+            {["user_id", "text", "created_at"].map((attr) => (
+                <div key={attr} className="chat-card-row">
+                    <div className="chat-detail-category">{attr}</div>
+                    <div className="chat-detail-value">
+                        {(chat || {})[attr]?.toString() || attr}
                     </div>
                 </div>
             ))}
         </div>
-    );
+    )
 }
 
-function EmptyAnimalList() {
-    return <AnimalList animals={[0, 1, 2, 3, 4].map(() => ({
-        name: "loading...",
-        kind: "kind",
-        age: "age",
+function EmptyChatList() {
+    return <ChatList chats={[0, 1, 2, 3, 4].map(() => ({
+        user_id: "loading...",
+        text: "Text of the message",
+        created_at: "Date - time",
     }))} />
 }
 
-function AnimalList({ animals }) {
+function ChatList({ chats }) {
     return (
-        <div className="animal-list">
-            {animals.map((animal) => (
-                <AnimalPreview key={animal.id} animal={animal} />
+        <div className="chat-list">
+            {chats.map((chat) => (
+                <ChatPreview key={chat.id} chat={chat} />
             ))}
         </div>
     );
 }
 
-function AnimalsPage() {
+function ChatPage() {
     const navigate = useNavigate();
     const { data, isLoading, error } = useQuery({
-        queryKey: ["animals"],
+        queryKey: ["chats"],
         queryFn: () => (
-            fetch("http://127.0.0.1:8000/animals")
+            fetch("http://127.0.0.1:8000/chats")
                 .then((response) => {
                     if (!response.ok) {
                         response.status === 404 ?
@@ -103,13 +112,13 @@ function AnimalsPage() {
 
     return (
         <>
-            <h1>animals</h1>
-            <div className="animals-page">
-                {!isLoading && data?.animals ?
-                    <AnimalList animals={data.animals} /> :
-                    <EmptyAnimalList />
+            <h1>chats</h1>
+            <div className="chats-page">
+                {!isLoading && data?.chats ?
+                    <ChatList chats={data.chats} /> :
+                    <EmptyChatList />
                 }
-                <AnimalCardWrapper />
+                <ChatCardWrapper />
             </div>
         </>
     );
