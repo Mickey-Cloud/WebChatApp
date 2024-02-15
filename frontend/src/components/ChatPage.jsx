@@ -9,10 +9,10 @@ function ChatListItem({ chat }) {
         {chat.name}
       </div>
       <div className="chat-list-item-detail">
-        {chat.user_ids.join(", ")}
+        Participants: <br/>{chat.user_ids.join(", ")}
       </div>
       <div className="chat-list-item-detail">
-        {new Date(chat.created_at).toLocaleDateString()}
+        Date: {new Date(chat.created_at).toLocaleDateString()}
       </div>
     </Link>
   )
@@ -30,10 +30,12 @@ function ChatList({ chats }) {
 
 function MessageList({ messages }){
   return(
-    <div className="chat-list">
-      { messages.map((message) =>
-        <MessageCard key={message.id} message={message}/>
-      )}
+    <div className="message-list-container">
+      <div className="message-list">
+        { messages.map((message) =>
+          <MessageCard key={message.id} message={message}/>
+        )}
+      </div>
     </div>
   )
 }
@@ -42,15 +44,15 @@ function MessageCard({ message }) {
   const date = new Date(message.created_at)
 
   return (
-    <div className="chat-card">
+    <div className="message-box">
       <div>
-        {message.user_id}
+        <span className="message-user" >{message.user_id}</span>
+        <span className="message-date-time">{date.toDateString()  + "    -   " + date.toLocaleTimeString()} </span>
       </div>
-      <div>
-        {date.toDateString()  + "    -   " + date.toLocaleTimeString()}
-      </div>
-      <div>
-        {message.text}
+      <div className="message-container">
+        <div className="message">
+          {message.text}
+        </div>
       </div>
     </div>
   )
@@ -77,14 +79,14 @@ function ChatListContainer() {
   if (data?.chats) {
     return (
       <div className="chat-list-container">
-        <h2>chats</h2>
+        <h2>Chats</h2>
         <ChatList chats={data.chats} />
       </div>
     )
   }
 
   return (
-    <h2>chat list</h2>
+    <h2>Chat List</h2>
   );
 }
 

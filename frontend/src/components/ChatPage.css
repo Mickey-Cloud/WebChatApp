@@ -8,7 +8,31 @@
 .chat-list {
   display: flex;
   flex-direction: column;
-  overflow-y: scroll;
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+.chat-list-item{
+  color:red;
+  background-color: pink;
+  border-radius: 5px;
+  margin: 5px;
+  padding: 5px;
+  min-width: 200px;
+}
+
+.chat-list-item:hover{
+  opacity: 80%;
+}
+
+.chat-list-item-name{
+  font-weight: bolder;
+  font-size: larger;
+  text-align: center;
+}
+
+.chat-list-item-detail{
+  font-size: small;
 }
 
 .chat-preview {
@@ -55,3 +79,40 @@
   border-bottom: 1px solid lightgray;
   grid-template-columns: 1fr 1fr;
 }
+
+.message-list-container{
+  border: white;
+  border-style: groove;
+  padding: 15px 10px;
+  border-radius: 10px;
+}
+.message-list{
+  max-height: 80vh;
+  overflow-y: scroll;
+  max-width: 50vw;
+}
+
+.message-box{
+  padding: 8px 20px;
+  border-radius: 5px;
+  margin: 5px;
+}
+
+.message-date-time{
+  text-align: right;
+  float:right;
+  font-size: large;
+}
+
+.message-user{
+  font-weight: bold;
+  font-size: large;
+}
+
+.message{
+  border-radius: 10px;
+  padding: 5px 10px;
+  background-color: hotpink;
+  width: fit-content;
+}
+
