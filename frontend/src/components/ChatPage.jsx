@@ -9,10 +9,10 @@ function ChatListItem({ chat }) {
         {chat.name}
       </div>
       <div className="chat-list-item-detail">
-        {chat.user_ids}
+        {chat.user_ids.join(", ")}
       </div>
       <div className="chat-list-item-detail">
-        {chat.created_at}
+        {new Date(chat.created_at).toLocaleDateString()}
       </div>
     </Link>
   )
@@ -39,19 +39,19 @@ function MessageList({ messages }){
 }
 
 function MessageCard({ message }) {
-  const attributes = [
-    "user_id",
-    "text",
-    "created_at"
-  ];
+  const date = new Date(message.created_at)
 
   return (
     <div className="chat-card">
-      {attributes.map((attr) => (
-        <div key={attr} className="chat-card-attr">
-          {attr}: {message[attr].toString()}
-        </div>
-      ))}
+      <div>
+        {message.user_id}
+      </div>
+      <div>
+        {date.toDateString()  + "    -   " + date.toLocaleTimeString()}
+      </div>
+      <div>
+        {message.text}
+      </div>
     </div>
   )
 }
@@ -109,7 +109,7 @@ function ChatPage() {
   return (
     <div className="chats-page">
       <ChatListContainer />
-      {chatId ? <ChatCardQueryContainer chatId={chatId} /> : <h2>pick a chat</h2>}
+      {chatId ? <ChatCardQueryContainer chatId={chatId} /> : <h2>Select a chat</h2>}
     </div>
   );
 }
