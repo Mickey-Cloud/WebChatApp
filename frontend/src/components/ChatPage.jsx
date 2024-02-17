@@ -1,10 +1,12 @@
 import { useQuery } from "react-query";
 import { Link, useParams } from "react-router-dom";
 import "./ChatPage.css";
+import { useState } from "react";
 
-function ChatListItem({ chat }) {
+function ChatListItem({ chat, onClick }) {
+  
   return (
-    <Link key={chat.id} to={`/chats/${chat.id}`} className="chat-list-item">
+    <Link key={chat.id} to={`/chats/${chat.id}`} className="chat-list-item" onClick={onClick}>
       <div className="chat-list-item-name">
         {chat.name}
       </div>
@@ -18,11 +20,11 @@ function ChatListItem({ chat }) {
   )
 }
 
-function ChatList({ chats }) {
+function ChatList({ chats, setMessageName}) {
   return (
     <div className="chat-list">
       {chats.map((chat) => (
-        <ChatListItem key={chat.id} chat={chat} />
+        <ChatListItem key={chat.id} chat={chat}  onClick={() => setMessageName(chat.name)} />
       ))}
     </div>
   )
@@ -58,16 +60,16 @@ function MessageCard({ message }) {
   )
 }
 
-function ChatCardContainer({ messages }) {
+function ChatCardContainer({ messages, messageName }) {
   return (
     <div className="chat-card-container">
-      <h2>Messages</h2>
+      <h2>{messageName}</h2>
       <MessageList messages={messages} />
     </div>
   );
 }
 
-function ChatListContainer() {
+function ChatListContainer( {setMessageName}) {
   const { data } = useQuery({
     queryKey: ["chats"],
     queryFn: () => (
@@ -80,7 +82,7 @@ function ChatListContainer() {
     return (
       <div className="chat-list-container">
         <h2>Chats</h2>
-        <ChatList chats={data.chats} />
+        <ChatList chats={data.chats} setMessageName={setMessageName} />
       </div>
     )
   }
@@ -90,7 +92,7 @@ function ChatListContainer() {
   );
 }
 
-function ChatCardQueryContainer({ chatId }) {
+function ChatCardQueryContainer({ chatId, messageName }) {
   const { data } = useQuery({
     queryKey: ["chats", chatId],
     queryFn: () => (
@@ -100,7 +102,7 @@ function ChatCardQueryContainer({ chatId }) {
   });
 
   if (data && data.messages) {
-    return <ChatCardContainer messages={data.messages} />
+    return <ChatCardContainer messages={data.messages} messageName={messageName} />
   }
 
   return <h2>loading...</h2>
@@ -108,10 +110,13 @@ function ChatCardQueryContainer({ chatId }) {
 
 function ChatPage() {
   const { chatId } = useParams();
+  const [MessageName, setMessageName] = useState(
+    "none",
+  );
   return (
     <div className="chats-page">
-      <ChatListContainer />
-      {chatId ? <ChatCardQueryContainer chatId={chatId} /> : <h2>Select a chat</h2>}
+      <ChatListContainer setMessageName={setMessageName}/>
+      {chatId ? <ChatCardQueryContainer chatId={chatId} messageName={MessageName} /> : <h2>Select a chat</h2>}
     </div>
   );
 }
