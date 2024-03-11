@@ -4,14 +4,15 @@ from typing import Literal
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
 
-from backend.entities import (
-    Chat,
-    ChatResponse,
+from backend.schema import(
     ChatCollection,
-    ChatUpdate,
+    ChatInDB,
+    ChatResponse,    
     MessageCollection,
+    MessageInDB,
     UserCollection,
 )
+
 
 from backend import database as db
 

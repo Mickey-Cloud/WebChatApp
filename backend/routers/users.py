@@ -7,12 +7,14 @@ from sqlmodel import Session
 
 from backend.auth import get_current_user
 
-from backend.entities import(
-    User,
+from backend.schema import(
+    UserChatLinkInDB,
+    UserCollection,
+    UserInDB,
     UserResponse,
     UserCreate,
-    UserCollection,
-    ChatCollection
+    ChatCollection,
+    ChatInDB,
 )
 from backend import database as db
 
