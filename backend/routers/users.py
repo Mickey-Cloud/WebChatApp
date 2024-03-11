@@ -10,7 +10,8 @@ from backend.auth import get_current_user
 from backend.schema import(
     UserCollection,
     UserResponse,
-    UserCreate,
+    UserInDB,
+    UserUpdate,
     ChatCollection,
 )
 from backend import database as db
@@ -33,6 +34,21 @@ def get_users(
         users=sorted(users, key=sort_key),
     )
 
+@users_router.get("/me", response_model=UserResponse)
+def get_me(
+    user: UserInDB = Depends(get_current_user)
+    ):
+    """Get Current User"""
+    return UserResponse(user=user)
+
+@users_router.put("/me", response_model=UserResponse)
+def update_me(
+    update_user: UserUpdate,
+    user: UserInDB = Depends(get_current_user),
+    session: Session = Depends(db.get_session)
+    ):
+    """Updates the username or email for the logged in user"""
+    return UserResponse(user=db.update_user(session, user.id, update_user))
 
 @users_router.get("/{user_id}", response_model=UserResponse)
 def get_user(

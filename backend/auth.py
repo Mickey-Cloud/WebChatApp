@@ -13,7 +13,14 @@ from pydantic import BaseModel, ValidationError
 from sqlmodel import Session, SQLModel, select
 
 from backend import database as db
-from backend.schema import User, UserInDB
+from backend.schema import (
+    User, 
+    UserInDB,
+    Claims,
+    UserRegistration,
+    AccessToken
+    )
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 access_token_duration = 3600  # seconds
@@ -22,30 +29,6 @@ jwt_key = os.environ.get("JWT_KEY", default="insecure-jwt-key-for-dev")
 jwt_alg = "HS256"
 
 auth_router = APIRouter(prefix="/auth", tags=["Authentication"])
-
-
-class UserRegistration(SQLModel):
-    """Request model to register new user."""
-
-    username: str
-    email: str
-    password: str
-
-
-class AccessToken(BaseModel):
-    """Response model for access token."""
-
-    access_token: str
-    token_type: str
-    expires_in: int
-
-
-class Claims(BaseModel):
-    """Access token claims (aka payload)."""
-
-    sub: str  # id of user
-    exp: int  # unix timestamp
-
 
 class AuthException(HTTPException):
     def __init__(self, error: str, description: str):
@@ -57,7 +40,6 @@ class AuthException(HTTPException):
             },
         )
 
-
 class InvalidCredentials(AuthException):
     def __init__(self):
         super().__init__(
@@ -65,20 +47,18 @@ class InvalidCredentials(AuthException):
             description="invalid username or password",
         )
 
-
 class InvalidToken(AuthException):
     def __init__(self):
         super().__init__(
             error="invalid_client",
-            description="invalid bearer token",
+            description="invalid access token",
         )
-
 
 class ExpiredToken(AuthException):
     def __init__(self):
         super().__init__(
             error="invalid_client",
-            description="expired bearer token",
+            description="expired access token",
         )
 
 
@@ -94,7 +74,6 @@ def get_current_user(
 @auth_router.post("/registration", response_model=User)
 def register_new_user(
     registration: UserRegistration,
-    # session: Session = Depends(db.get_session),
     session: Annotated[Session, Depends(db.get_session)],
 ):
     """Register new user."""

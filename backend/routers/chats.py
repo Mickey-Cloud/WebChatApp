@@ -1,18 +1,24 @@
-from datetime import date
+from datetime import date, datetime, timezone
 from typing import Literal
 
-from fastapi import APIRouter, Depends
-from sqlmodel import Session
+from fastapi import APIRouter, Depends, Query
+from sqlmodel import Session, select
 
 from backend.schema import(
     ChatCollection,
     ChatUpdate,
-    ChatResponse,    
+    ChatResponse, 
+    ChatMetadata, 
+    Chat,  
     MessageCollection,
+    MessageInDB,
+    MessageNew,
+    Message,
     UserCollection,
+    UserInDB
 )
 
-
+from backend.auth import get_current_user
 from backend import database as db
 
 chats_router = APIRouter(prefix="/chats", tags=["Chats"])
@@ -35,13 +41,94 @@ def get_chats(
 @chats_router.get("/{chat_id}", response_model=ChatResponse)
 def get_chat(
     chat_id: int,
+    include: list[str] = Query(None),
     session: Session = Depends(db.get_session)
     ):
     """Get a chat for a given ID."""
     
-    return ChatResponse(
-        chat = db.get_chat_by_id(session, chat_id))
+    chat = db.get_chat_by_id(session, chat_id)
+    if include != None :
+        if(include.__contains__("messages")):
+            messages = from_MessageInDB_to_Message(chat.messages)
+        else:
+            messages= None
+        if(include.__contains__("users")):
+            users = chat.users
+        else:
+            users = None
+    else:
+        chat = ChatResponse(
+            meta= ChatMetadata(
+                message_count= len(chat.messages),
+                user_count= len(chat.users)
+                ),
+            chat = Chat(
+                id=chat.id,
+                name=chat.name,
+                owner=chat.owner,
+                created_at=chat.created_at
+                )
+            )
+        return chat
+        
+    
+    if (messages == None and users != None):
+        chat = ChatResponse(
+            meta= ChatMetadata(
+                message_count= len(chat.messages),
+                user_count= len(chat.users)
+                ),
+            chat = Chat(
+                id=chat.id,
+                name=chat.name,
+                owner=chat.owner,
+                created_at=chat.created_at
+                ),
+            users = users
+            )
+    elif users == None and messages != None:
+        chat = ChatResponse(
+            meta= ChatMetadata(
+                message_count= len(chat.messages),
+                user_count= len(chat.users)
+                ),
+            chat = Chat(
+                id=chat.id,
+                name=chat.name,
+                owner=chat.owner,
+                created_at=chat.created_at
+                ),
+            messages=messages
+            )
+    else:
+        chat = ChatResponse(
+            meta= ChatMetadata(
+                message_count= len(chat.messages),
+                user_count= len(chat.users)
+                ),
+            chat = Chat(
+                id=chat.id,
+                name=chat.name,
+                owner=chat.owner,
+                created_at=chat.created_at
+                ),
+            messages=messages,
+            users=users
+            )
+    
+    return chat
 
+def from_MessageInDB_to_Message(messageList = list[MessageInDB]) -> list[Message]:
+    newMessageList = []
+    for message in messageList:
+        newMessageList.append(Message(
+            id=message.id,
+            text=message.text,
+            chat_id=message.chat_id,
+            user=message.user,
+            created_at=message.created_at
+        ))
+    return newMessageList
 
 @chats_router.put("/{chat_id}", response_model=ChatResponse)
 def update_chat(
@@ -83,3 +170,14 @@ def get_user_fosters(
         meta ={"count": len(users)},
         users=sorted(users, key=sort_key)
     )
+    
+@chats_router.post("/{chat_id}/messages", response_model=MessageInDB)
+def post_message_to_chat(
+    new_message: MessageNew,
+    chat_id: int,
+    user: UserInDB = Depends(get_current_user),
+    session: Session = Depends(db.get_session)
+    ):
+    """Adds a message to the chat by the currently logged in user"""
+    
+    return (Message(db.post_message(session, chat_id, user.id, new_message)))

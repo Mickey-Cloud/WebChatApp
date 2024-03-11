@@ -4,11 +4,14 @@ from sqlmodel import Session, SQLModel, create_engine, select
 
 from backend.schema import (
     UserInDB,
-    UserCreate,
+    UserRegistration,
+    UserUpdate,
     ChatInDB,
     ChatUpdate,
     ChatCollection,
     MessageInDB,
+    Message,
+    
 )
 
 engine = create_engine(
@@ -49,28 +52,27 @@ def get_all_users(session: Session) -> list[UserInDB]:
 
     return session.exec(select(UserInDB)).all()
 
-
-def create_user(session: Session, user_create: UserCreate) -> UserInDB:
+def update_user(session: Session, user_id: int, user_update: UserUpdate) -> UserInDB:
     """
-    Create a new user in the database.
+    Update the username or email for a user
 
-    :param user_create: attributes of the user to be created
-    :return: the newly created user
-    :raise: DuplicateEntityException if the user id already exists
+    Args:
+        session (Session): database session
+        user_id (int): user's id
+        user_update (UserUpdate): Information to update on the user
+
+    Returns:
+        UserInDB: The updated user
     """
-
-    user = UserInDB(
-        created_at=datetime.today(),
-        **user_create.model_dump(),
-    )
     
+    user = get_user_by_id(session, user_id)
+    for key, value in user_update.update_attributes().items():
+        setattr(user, key, value)
     session.add(user)
     session.commit()
     session.refresh(user)
-    return user
     
-    raise DuplicateEntityException(entity_name="User", entity_id=user.id)
-
+    return user
 
 def get_user_by_id(session: Session, user_id: int) -> UserInDB:
     """
@@ -85,7 +87,7 @@ def get_user_by_id(session: Session, user_id: int) -> UserInDB:
 
     raise EntityNotFoundException(entity_name="User", entity_id=user_id)
 
-def get_user_chats(session: Session, user_id: str) -> ChatCollection:
+def get_user_chats(session: Session, user_id: int) -> ChatCollection:
     """
     Retrieves a collection of chats the user has participated in
     
@@ -111,7 +113,7 @@ def get_chats(session: Session) -> ChatCollection:
     """
     return session.exec(select(ChatInDB)).all()
 
-def get_chat_by_id(session: Session, chat_id: str) -> ChatInDB:
+def get_chat_by_id(session: Session, chat_id: int) -> ChatInDB:
     """
     Retrieve an chat from the database.
     
@@ -124,7 +126,7 @@ def get_chat_by_id(session: Session, chat_id: str) -> ChatInDB:
 
     raise EntityNotFoundException(entity_name="Chat", entity_id=chat_id)
 
-def put_chat_name_update(session: Session, chat_id: str, chat_update: ChatUpdate) -> ChatInDB:
+def put_chat_name_update(session: Session, chat_id: int, chat_update: ChatUpdate) -> ChatInDB:
     """
     Update the Name of a Chat
 
@@ -141,7 +143,7 @@ def put_chat_name_update(session: Session, chat_id: str, chat_update: ChatUpdate
     
     return chat
 
-def delete_chat(session: Session, chat_id: str):
+def delete_chat(session: Session, chat_id: int):
     """
     Deletes a chat based off the given ID
 
@@ -155,7 +157,7 @@ def delete_chat(session: Session, chat_id: str):
     session.delete(chat)
     session.commit()
 
-def get_messages_by_chat_id(session: Session, chat_id: str) -> list[MessageInDB]:
+def get_messages_by_chat_id(session: Session, chat_id: int) -> list[Message]:
     """
     Get all the messages for a given chat ID
 
@@ -166,7 +168,7 @@ def get_messages_by_chat_id(session: Session, chat_id: str) -> list[MessageInDB]
     chat = get_chat_by_id(session, chat_id)
     return chat.messages
 
-def get_chat_users(session: Session, chat_id: str) -> list[UserInDB]:
+def get_chat_users(session: Session, chat_id: int) -> list[UserInDB]:
     """
     Get all the users associated with the particular chat
 
@@ -180,3 +182,31 @@ def get_chat_users(session: Session, chat_id: str) -> list[UserInDB]:
     
     users = chat.users
     return users
+
+def post_message(session: Session, chat_id: int, user_id: int, text: str) -> MessageInDB:
+    """
+    Post a new message to a chat
+
+    Args:
+        session (Session): database session
+        chat_id (int): id of the chat to add the message to
+        user_id (int): user adding the message
+        text (str): text of the message added
+
+    Returns:
+        MessageInDB: database version of the message added
+        
+    Raises:
+        EntityNotFound: The chat to add the message to does not exist.
+    """
+    get_chat_by_id(session, chat_id)
+    message = MessageInDB(
+        text=text,
+        user_id=user_id,
+        chat_id=chat_id
+    )
+    
+    session.add(message)
+    session.commit()
+    session.refresh(message)
+    return message
