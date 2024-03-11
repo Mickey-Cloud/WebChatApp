@@ -2,7 +2,10 @@ from datetime import date
 from typing import Literal
 from uuid import uuid4
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlmodel import Session
+
+from backend.auth import get_current_user
 
 from backend.entities import(
     User,

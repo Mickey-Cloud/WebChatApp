@@ -1,6 +1,8 @@
 import json
 from datetime import date, datetime
 
+from sqlmodel import Session, SQLModel, create_engine
+
 from backend.entities import (
     Chat,
     User,
@@ -11,8 +13,27 @@ from backend.entities import (
     Message,
 )
 
-with open("backend/fake_db.json", "r") as f:
-    DB = json.load(f)
+from backend.schema import (
+    UserChatLinkInDB,
+    UserInDB,
+    ChatInDB,
+    MessageInDB
+)
+
+engine = create_engine(
+    "sqlite:///backend/pony_express.db",
+    echo=True,
+    connect_args={"check_same_thread": False},
+)
+
+
+def create_db_and_tables():
+    SQLModel.metadata.create_all(engine)
+
+
+def get_session():
+    with Session(engine) as session:
+        yield session
 
 class EntityNotFoundException(Exception):
     def __init__(self, *, entity_name: str, entity_id: str):
@@ -28,7 +49,7 @@ class DuplicateEntityException(Exception):
 #   -------- users --------   #
 
 
-def get_all_users() -> list[User]:
+def get_all_users(session: Session) -> list[User]:
     """
     Retrieve all users from the database.
 
@@ -38,7 +59,7 @@ def get_all_users() -> list[User]:
     return [User(**user_data) for user_data in DB["users"].values()]
 
 
-def create_user(user_create: UserCreate) -> User:
+def create_user(session: Session, user_create: UserCreate) -> User:
     """
     Create a new user in the database.
 
@@ -58,7 +79,7 @@ def create_user(user_create: UserCreate) -> User:
     raise DuplicateEntityException(entity_name="User", entity_id=user.id)
 
 
-def get_user_by_id(user_id: str) -> User:
+def get_user_by_id(session: Session, user_id: str) -> User:
     """
     Retrieve an user from the database.
 
@@ -70,7 +91,7 @@ def get_user_by_id(user_id: str) -> User:
 
     raise EntityNotFoundException(entity_name="User", entity_id=user_id)
 
-def get_user_chats(user_id: str) -> ChatCollection:
+def get_user_chats(session: Session, user_id: str) -> ChatCollection:
     """
     Retrieves a collection of chats the user has participated in
     
@@ -88,7 +109,7 @@ def get_user_chats(user_id: str) -> ChatCollection:
 
 # ----------------- Chats --------------------- #
 
-def get_chats() -> ChatCollection:
+def get_chats(session: Session) -> ChatCollection:
     """
     Retrieves a list of all the chats
     
@@ -97,7 +118,7 @@ def get_chats() -> ChatCollection:
     """
     return [Chat(**chat_data) for chat_data in DB["chats"].values()]
 
-def get_chat_by_id(chat_id: str) -> Chat:
+def get_chat_by_id(session: Session, chat_id: str) -> Chat:
     """
     Retrieve an chat from the database.
     
@@ -109,7 +130,7 @@ def get_chat_by_id(chat_id: str) -> Chat:
 
     raise EntityNotFoundException(entity_name="Chat", entity_id=chat_id)
 
-def put_chat_name_update(chat_id: str, chat_update: ChatUpdate) -> Chat:
+def put_chat_name_update(session: Session, chat_id: str, chat_update: ChatUpdate) -> Chat:
     """
     Update the Name of a Chat
 
@@ -129,7 +150,7 @@ def put_chat_name_update(chat_id: str, chat_update: ChatUpdate) -> Chat:
     
     return updated_chat
 
-def delete_chat(chat_id: str):
+def delete_chat(session: Session, chat_id: str):
     """
     Deletes a chat based off the given ID
 
@@ -142,7 +163,7 @@ def delete_chat(chat_id: str):
     chat = get_chat_by_id(chat_id)
     del DB["chats"][chat.id]
 
-def get_messages_by_chat_id(chat_id: str) -> list[Message]:
+def get_messages_by_chat_id(session: Session, chat_id: str) -> list[Message]:
     """
     Get all the messages for a given chat ID
 
@@ -155,7 +176,7 @@ def get_messages_by_chat_id(chat_id: str) -> list[Message]:
     chat = ChatDB(**DB["chats"][chat_id])
     return chat.messages
 
-def get_chat_users(chat_id: str) -> list[User]:
+def get_chat_users(session: Session, chat_id: str) -> list[User]:
     """
     Get all the users associated with the particular chat
 

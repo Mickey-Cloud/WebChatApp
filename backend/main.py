@@ -2,14 +2,24 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 
+from contextlib import asynccontextmanager
+
 from backend.routers.chats import chats_router
 from backend.routers.users import users_router
 from backend.database import EntityNotFoundException, DuplicateEntityException
+
+from backend.database import create_db_and_tables
+
+@asynccontextmanager
+def lifespan(app: FastAPI):
+    create_db_and_tables()
+    yield
 
 app = FastAPI(
     title="Pony Express API",
     description="API for managing users and chats.",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 app.include_router(chats_router)

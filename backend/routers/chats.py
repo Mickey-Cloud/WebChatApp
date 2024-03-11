@@ -1,7 +1,8 @@
 from datetime import date
 from typing import Literal
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlmodel import Session
 
 from backend.entities import (
     Chat,
