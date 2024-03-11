@@ -4,6 +4,7 @@ from sqlmodel import Session, SQLModel, StaticPool, create_engine
 
 from backend.main import app
 from backend import database as db
+from backend import auth
 
 @pytest.fixture
 def session():
@@ -27,3 +28,20 @@ def client(session):
     yield TestClient(app)
 
     app.dependency_overrides.clear()
+    
+@pytest.fixture
+def user_fixture(session):
+    def _build_user(
+        username: str = "miguel",
+        email: str = "migi@test.test",
+        password: str = "password",
+    )-> db.UserInDB:
+        return auth.register_new_user(
+            auth.UserRegistration(
+                username=username,
+                email=email,
+                password=password,
+            ),
+            session,
+        )
+    return _build_user

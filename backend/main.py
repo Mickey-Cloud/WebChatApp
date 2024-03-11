@@ -12,7 +12,7 @@ from backend.database import EntityNotFoundException, DuplicateEntityException
 from backend.database import create_db_and_tables
 
 @asynccontextmanager
-def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI):
     create_db_and_tables()
     yield
 

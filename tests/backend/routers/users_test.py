@@ -1,10 +1,24 @@
-from datetime import date
+from datetime import date, datetime
 
 import pytest
 
 from fastapi.testclient import TestClient
 
-from backend.main import app    
+from backend.main import app  
+from backend.schema import UserInDB  
+
+@pytest.fixture
+def default_users():
+    return{
+        UserInDB(
+            id=1,
+            username="miguel",
+            email="migi@test.com",
+            hashed_password="password123",
+            created_at= datetime.now()
+        ),
+        
+    }
 
 # --------------- User Tests -------------------- #
 def test_get_all_users():
@@ -19,7 +33,9 @@ def test_get_all_users():
 
 def test_create_user():
     create_params = {
-        "id": "JimmyFallon",
+        "username": "JimmyFallon",
+        "email": "email@test.com",
+        "password": "password",
     }
     client = TestClient(app)
     response = client.post("/users", json=create_params)
@@ -37,7 +53,7 @@ def test_create_user():
 
 def test_create_duplicate_user():
     client = TestClient(app)
-    userId = "burke"
+    userId = 1
     response = client.get(f"/users/{userId}")
     assert response.status_code == 200
     user = response.json()['user']
@@ -58,7 +74,7 @@ def test_create_duplicate_user():
 
 def test_get_user():
     client = TestClient(app)
-    userId = "bishop"
+    userId = 1
     response = client.get(f"/users/{userId}")
     assert response.status_code == 200
     
@@ -67,7 +83,7 @@ def test_get_user():
 
 def test_get_user_dne():
     client = TestClient(app)
-    userId = "DNE"
+    userId = 0
     response = client.get(f"/users/{userId}")
     assert response.status_code == 404
     assert response.json() == {
@@ -80,7 +96,7 @@ def test_get_user_dne():
 
 def test_get_user_chats():
     client = TestClient(app)
-    userId = "bishop"
+    userId = 1
     response = client.get(f"/users/{userId}/chats")
     
     meta = response.json()["meta"]
@@ -90,7 +106,7 @@ def test_get_user_chats():
 
 def test_user_dne_get_user_chats():
     client = TestClient(app)
-    userId = "DNE"
+    userId = 0
     response = client.get(f"/users/{userId}/chats")
     assert response.status_code == 404
     assert response.json() == {

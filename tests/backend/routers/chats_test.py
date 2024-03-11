@@ -20,7 +20,7 @@ def test_get_all_chats():
 
 def test_get_chat():
     client = TestClient(app)
-    chatId = "660c7a6bc1324e4488cafabc59529c93"
+    chatId = 1
     response = client.get(f"/chats/{chatId}")
     assert response.status_code == 200
     
@@ -29,7 +29,7 @@ def test_get_chat():
 
 def test_get_chat_dne():
     client = TestClient(app)
-    chatId = "DNE"
+    chatId = 0
     response = client.get(f"/chats/{chatId}")
     assert response.status_code == 404
     assert response.json() == {
@@ -42,7 +42,7 @@ def test_get_chat_dne():
 
 def test_put_chat_dne():
     client = TestClient(app)
-    chatId = "DNE"
+    chatId = 0
     create_params= {
         "name": "Updated Name",
     }
@@ -58,7 +58,7 @@ def test_put_chat_dne():
 
 def test_put_chat():
     client = TestClient(app)
-    chatId = "6215e6864e884132baa01f7f972400e2"
+    chatId = 1
     create_params= {
         "name": "Updated Name",
     }
@@ -78,7 +78,7 @@ def test_put_chat():
 
 def test_delete_chat():
     client = TestClient(app)
-    chatId = "6215e6864e884132baa01f7f972400e2"
+    chatId = 1
     response = client.delete(f"/chats/{chatId}")
     assert response.status_code == 204
     
@@ -94,7 +94,7 @@ def test_delete_chat():
 
 def test_delete_chat_dne():
     client = TestClient(app)
-    chatId = "DNE"
+    chatId = 0
     response = client.delete(f"/chats/{chatId}")
     assert response.status_code == 404
     assert response.json() == {
@@ -107,7 +107,7 @@ def test_delete_chat_dne():
 
 def test_get_chat_messages():
     client = TestClient(app)
-    chatId = "e0ec0881a2c645de842ca5dd0fa7985b"
+    chatId = 1
     response = client.get(f"/chats/{chatId}/messages")
     assert response.status_code == 200
     
@@ -119,7 +119,7 @@ def test_get_chat_messages():
     
 def test_get_chat_messages_DNE():
     client = TestClient(app)
-    chatId = "DNE"
+    chatId = 0
     response = client.get(f"/chats/{chatId}/messages")
     assert response.status_code == 404
     assert response.json() == {
@@ -132,7 +132,7 @@ def test_get_chat_messages_DNE():
 
 def test_get_chat_users():
     client = TestClient(app)
-    chatId = "e0ec0881a2c645de842ca5dd0fa7985b"
+    chatId = 1
     response = response = client.get(f"/chats/{chatId}/users")
     assert response.status_code == 200
     
@@ -143,7 +143,7 @@ def test_get_chat_users():
 
 def test_get_chat_users_dne():
     client = TestClient(app)
-    chatId = "DNE"
+    chatId = 0
     response = client.get(f"/chats/{chatId}/users")
     assert response.status_code == 404
     assert response.json() == {

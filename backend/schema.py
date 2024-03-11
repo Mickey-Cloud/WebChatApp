@@ -35,6 +35,13 @@ class UserInDB(SQLModel, table=True):
         link_model=UserChatLinkInDB,
     )
     
+class User(SQLModel):
+    """Data model for user."""
+    id: int
+    username: str
+    email: str
+    created_at: datetime
+    
 class UserCreate(SQLModel):
     """Request model for adding a new user to the system"""
     

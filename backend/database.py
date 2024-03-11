@@ -94,11 +94,11 @@ def get_user_chats(session: Session, user_id: str) -> ChatCollection:
     :raise: EntityNotFoundException if the user's id is not found
     """
     
-    get_user_by_id(session, user_id)
+    user = get_user_by_id(session, user_id)
     
-    chat_list = get_chats()
+    chat_list = get_chats(session)
     
-    return [chat for chat in chat_list if user_id in chat.user_ids]
+    return [chat for chat in chat_list if user in chat.users]
 
 # ----------------- Chats --------------------- #
 
