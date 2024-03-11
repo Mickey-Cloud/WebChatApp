@@ -33,17 +33,6 @@ def get_users(
         users=sorted(users, key=sort_key),
     )
 
-#need to add duplicate entity option
-@users_router.post("", response_model=UserResponse)
-def create_user(
-    user_create: UserCreate,
-    session: Session = Depends(db.get_session)
-    ):
-    """Creates a new user in the database if the ID doesn't match an already created user"""
-    
-    return UserResponse(
-        user=db.create_user(session, user_create))
-
 
 @users_router.get("/{user_id}", response_model=UserResponse)
 def get_user(

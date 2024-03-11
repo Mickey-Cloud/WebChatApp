@@ -54,24 +54,6 @@ def update_chat(
     return ChatResponse(
         chat = db.put_chat_name_update(session, chat_id, chat_update))
 
-
-@chats_router.delete(
-    "/{chat_id}",
-    status_code=204,
-    response_model=None
-    )
-def delete_user(
-    chat_id: int,
-    session: Session = Depends(db.get_session)
-    ):
-    """
-    Deletes a chat by the given ID
-
-    Args:
-        chat_id (int): The ID of the chat to be deleted.
-    """
-    db.delete_chat(session, chat_id)
-
 @chats_router.get("/{chat_id}/messages", response_model=MessageCollection)
 def get_chat_messages(
     chat_id: int,
