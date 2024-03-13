@@ -21,6 +21,11 @@ from backend.schema import (
     AccessToken
     )
 
+class DuplicateValueException(Exception):
+    def __init__(self, *, entity_name: str, entity_field: str, entity_value: str):
+        self.entity_name = entity_name
+        self.entity_field = entity_field
+        self.entity_value = entity_value
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 access_token_duration = 3600  # seconds
@@ -61,7 +66,6 @@ class ExpiredToken(AuthException):
             description="expired access token",
         )
 
-
 def get_current_user(
     session: Session = Depends(db.get_session),
     token: str = Depends(oauth2_scheme),
@@ -78,6 +82,13 @@ def register_new_user(
 ):
     """Register new user."""
 
+    duplicateUser = session.exec(select(UserInDB).where(UserInDB.username == registration.username)).first()
+    if(duplicateUser != None):
+        raise DuplicateValueException(entity_name="user", entity_field="username", entity_value=registration.username)
+    duplicateUser = session.exec(select(UserInDB).where(UserInDB.email == registration.email)).first()
+    if(duplicateUser != None):
+        raise DuplicateValueException(entity_name="user", entity_field="email", entity_value=registration.email)
+    
     hashed_password = pwd_context.hash(registration.password)
     user = UserInDB(
         **registration.model_dump(),

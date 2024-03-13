@@ -2,10 +2,16 @@ from datetime import datetime
 
 from sqlmodel import Session, SQLModel, create_engine, select
 
+from backend.helpers import(
+    from_MessagesInDB_to_Messages,
+    messageInDB_to_Message,
+)
+
 from backend.schema import (
     UserInDB,
     UserRegistration,
     UserUpdate,
+    Chat,
     ChatInDB,
     ChatUpdate,
     ChatCollection,
@@ -110,7 +116,7 @@ def get_chats(session: Session) -> ChatCollection:
     Retrieves a list of all the chats
     
     Returns:
-        ChatCollection: _description_
+        ChatCollection: a chat collection in the chat response format
     """
     return session.exec(select(ChatInDB)).all()
 
@@ -127,7 +133,7 @@ def get_chat_by_id(session: Session, chat_id: int) -> ChatInDB:
 
     raise EntityNotFoundException(entity_name="Chat", entity_id=chat_id)
 
-def put_chat_name_update(session: Session, chat_id: int, chat_update: ChatUpdate) -> ChatInDB:
+def put_chat_name_update(session: Session, chat_id: int, chat_update: ChatUpdate) -> Chat:
     """
     Update the Name of a Chat
 
@@ -136,13 +142,18 @@ def put_chat_name_update(session: Session, chat_id: int, chat_update: ChatUpdate
         chat_update (ChatUpdate): the name to update in the chat
     """
     chat = get_chat_by_id(session, chat_id)
-    for key, value in chat_update.update_attributes().items():
+    for key, value in chat_update:
         setattr(chat, key, value)
     session.add(chat)
     session.commit()
     session.refresh(chat)
     
-    return chat
+    return Chat(
+        id=chat.id,
+        name=chat.name,
+        owner=chat.owner,
+        created_at=chat.created_at
+    )
 
 def delete_chat(session: Session, chat_id: int):
     """
@@ -167,7 +178,8 @@ def get_messages_by_chat_id(session: Session, chat_id: int) -> list[Message]:
     """
     
     chat = get_chat_by_id(session, chat_id)
-    return chat.messages
+    messages = from_MessagesInDB_to_Messages(chat.messages)
+    return messages
 
 def get_chat_users(session: Session, chat_id: int) -> list[UserInDB]:
     """
@@ -210,4 +222,5 @@ def post_message(session: Session, chat_id: int, user_id: int, text: str) -> Mes
     session.add(message)
     session.commit()
     session.refresh(message)
-    return message
+    
+    return messageInDB_to_Message(message)

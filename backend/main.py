@@ -4,10 +4,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from contextlib import asynccontextmanager
 
-from backend.auth import auth_router
+from backend.auth import auth_router, DuplicateValueException
 from backend.routers.chats import chats_router
 from backend.routers.users import users_router
-from backend.database import EntityNotFoundException, DuplicateEntityException
+from backend.database import (
+    EntityNotFoundException,
+    DuplicateEntityException,
+)
 
 from backend.database import create_db_and_tables
 
@@ -63,6 +66,22 @@ def handle_duplicate_entity(
                 "type": "duplicate_entity",
                 "entity_name": exception.entity_name,
                 "entity_id": exception.entity_id,
+            },
+        },
+    )
+@app.exception_handler(DuplicateValueException)
+def handle_duplicate_value(
+    _request: Request,
+    exception: DuplicateValueException
+)-> JSONResponse:
+    return JSONResponse(
+        status_code=422,
+        content={
+            "detail": {
+                "type": "duplicate_Value",
+                "entity_name": exception.entity_name,
+                "entity_filed": exception.entity_field,
+                "entity_value": exception.entity_value,
             },
         },
     )

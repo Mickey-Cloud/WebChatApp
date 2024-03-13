@@ -4,6 +4,13 @@ from typing import Literal
 from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session, select
 
+from backend.helpers import (
+    messageInDB_to_Message,
+    from_MessagesInDB_to_Messages,
+    chatInDB_to_chat,
+    chatsInDB_to_chats
+)
+
 from backend.schema import(
     ChatCollection,
     ChatUpdate,
@@ -32,11 +39,13 @@ def get_chats(
     """Gets all the chats"""
     
     sort_key = lambda chat: getattr(chat, sort)
-    chats = db.get_chats(session)
+    chats = chatsInDB_to_chats(session)
     return ChatCollection(
         meta={"count": len(chats)},
         chats=sorted(chats, key=sort_key),
     )
+
+
 
 @chats_router.get("/{chat_id}", response_model=ChatResponse)
 def get_chat(
@@ -49,7 +58,7 @@ def get_chat(
     chat = db.get_chat_by_id(session, chat_id)
     if include != None :
         if(include.__contains__("messages")):
-            messages = from_MessageInDB_to_Message(chat.messages)
+            messages = from_MessagesInDB_to_Messages(chat.messages)
         else:
             messages= None
         if(include.__contains__("users")):
@@ -118,19 +127,7 @@ def get_chat(
     
     return chat
 
-def from_MessageInDB_to_Message(messageList = list[MessageInDB]) -> list[Message]:
-    newMessageList = []
-    for message in messageList:
-        newMessageList.append(Message(
-            id=message.id,
-            text=message.text,
-            chat_id=message.chat_id,
-            user=message.user,
-            created_at=message.created_at
-        ))
-    return newMessageList
-
-@chats_router.put("/{chat_id}", response_model=ChatResponse)
+@chats_router.put("/{chat_id}", response_model=Chat)
 def update_chat(
     chat_id: int,
     chat_update: ChatUpdate,
@@ -138,8 +135,7 @@ def update_chat(
     ):
     """Changes the name of the given chat"""
     
-    return ChatResponse(
-        chat = db.put_chat_name_update(session, chat_id, chat_update))
+    return db.put_chat_name_update(session, chat_id, chat_update)
 
 @chats_router.get("/{chat_id}/messages", response_model=MessageCollection)
 def get_chat_messages(
@@ -157,7 +153,7 @@ def get_chat_messages(
     )
 
 @chats_router.get("/{chat_id}/users", response_model=UserCollection)
-def get_user_fosters(
+def get_users_in_chat(
     chat_id: int,
     sort: Literal["id", "created_at"] = "id",
     session: Session = Depends(db.get_session)
@@ -171,7 +167,7 @@ def get_user_fosters(
         users=sorted(users, key=sort_key)
     )
     
-@chats_router.post("/{chat_id}/messages", response_model=MessageInDB)
+@chats_router.post("/{chat_id}/messages", response_model=Message)
 def post_message_to_chat(
     new_message: MessageNew,
     chat_id: int,
@@ -180,4 +176,4 @@ def post_message_to_chat(
     ):
     """Adds a message to the chat by the currently logged in user"""
     
-    return (Message(db.post_message(session, chat_id, user.id, new_message)))
+    return db.post_message(session, chat_id, user.id, new_message.text)

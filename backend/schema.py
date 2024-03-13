@@ -59,7 +59,7 @@ class UserCollection(BaseModel):
     """Represents an API response for a collection of users."""
 
     meta: Metadata
-    users: list[UserInDB]
+    users: list[User]
 
 class UserUpdate(BaseModel):
     """Request model for updating a user in the system."""
@@ -82,19 +82,20 @@ class MessageInDB(SQLModel, table=True):
     
 class MessageNew(SQLModel):
     text: str
-
-class MessageCollection(BaseModel):
-    """Represents an API response for a collection of Messages"""
-    
-    meta: Metadata
-    messages: list[MessageInDB]
-    
 class Message(BaseModel):
     id: int
     text: str
     chat_id: int
     user: User
     created_at: datetime
+
+class MessageCollection(BaseModel):
+    """Represents an API response for a collection of Messages"""
+    
+    meta: Metadata
+    messages: list["Message"]
+    
+
 
 ######################### Chat Models ##########################
 class ChatInDB(SQLModel, table=True):
@@ -131,7 +132,7 @@ class ChatCollection(BaseModel):
     """Represents an API response for a collection of chats."""
     
     meta: Metadata
-    chats: list[ChatInDB]
+    chats: list[Chat]
 
 class ChatUpdate(SQLModel):
     name: str = None
