@@ -14,7 +14,8 @@ from backend.helpers import (
 from backend.schema import(
     ChatCollection,
     ChatUpdate,
-    ChatResponse, 
+    ChatResponse,
+    ChatResponseSm, 
     ChatMetadata, 
     Chat,  
     MessageCollection,
@@ -127,7 +128,7 @@ def get_chat(
     
     return chat
 
-@chats_router.put("/{chat_id}", response_model=Chat)
+@chats_router.put("/{chat_id}", response_model=ChatResponseSm)
 def update_chat(
     chat_id: int,
     chat_update: ChatUpdate,
@@ -135,7 +136,7 @@ def update_chat(
     ):
     """Changes the name of the given chat"""
     
-    return db.put_chat_name_update(session, chat_id, chat_update)
+    return ChatResponseSm(chat = db.put_chat_name_update(session, chat_id, chat_update))
 
 @chats_router.get("/{chat_id}/messages", response_model=MessageCollection)
 def get_chat_messages(

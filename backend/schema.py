@@ -128,6 +128,9 @@ class ChatResponse(SQLModel):
     messages: Optional[list["Message"]] = None
     users: Optional[list[User]] = None
 
+class ChatResponseSm(SQLModel):
+    chat:Chat
+    
 class ChatCollection(BaseModel):
     """Represents an API response for a collection of chats."""
     

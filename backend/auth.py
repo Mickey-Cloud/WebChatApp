@@ -16,6 +16,7 @@ from backend import database as db
 from backend.schema import (
     User, 
     UserInDB,
+    UserResponse,
     Claims,
     UserRegistration,
     AccessToken
@@ -75,7 +76,7 @@ def get_current_user(
     return user
 
 
-@auth_router.post("/registration", response_model=User)
+@auth_router.post("/registration", response_model=UserResponse)
 def register_new_user(
     registration: UserRegistration,
     session: Annotated[Session, Depends(db.get_session)],
@@ -84,10 +85,10 @@ def register_new_user(
 
     duplicateUser = session.exec(select(UserInDB).where(UserInDB.username == registration.username)).first()
     if(duplicateUser != None):
-        raise DuplicateValueException(entity_name="user", entity_field="username", entity_value=registration.username)
+        raise DuplicateValueException(entity_name="User", entity_field="username", entity_value=registration.username)
     duplicateUser = session.exec(select(UserInDB).where(UserInDB.email == registration.email)).first()
     if(duplicateUser != None):
-        raise DuplicateValueException(entity_name="user", entity_field="email", entity_value=registration.email)
+        raise DuplicateValueException(entity_name="User", entity_field="email", entity_value=registration.email)
     
     hashed_password = pwd_context.hash(registration.password)
     user = UserInDB(
@@ -97,7 +98,7 @@ def register_new_user(
     session.add(user)
     session.commit()
     session.refresh(user)
-    return user
+    return UserResponse(user = user)
 
 
 @auth_router.post("/token", response_model=AccessToken)
