@@ -61,10 +61,10 @@ class UserCollection(BaseModel):
     meta: Metadata
     users: list[UserInDB]
 
-class UserUpdate(SQLModel):
+class UserUpdate(BaseModel):
     """Request model for updating a user in the system."""
-    username: str = None
-    email: str = None
+    username: Optional[str] = None
+    email: Optional[str] = None
 ####################### Message Models ###########################
 class MessageInDB(SQLModel, table=True):
     """Database model for message."""

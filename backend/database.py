@@ -66,8 +66,9 @@ def update_user(session: Session, user_id: int, user_update: UserUpdate) -> User
     """
     
     user = get_user_by_id(session, user_id)
-    for key, value in user_update.update_attributes().items():
-        setattr(user, key, value)
+    for key, value in user_update:
+        if(value != None):
+            setattr(user, key, value)
     session.add(user)
     session.commit()
     session.refresh(user)
