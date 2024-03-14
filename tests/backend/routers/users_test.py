@@ -144,13 +144,27 @@ def test_get_auth_token(client, session, default_users):
     session.add_all(default_users)
     session.commit()
     
+    create_params = {
+        "username": "jimmyfallon",
+        "email": "jimmy@test.com",
+        "password": "jimmy123",
+    }
+    
+    response = client.post("/auth/registration", json=create_params)
+    
+    assert response.status_code == 201
+    user = response.json()['user']
+    partial_create_params={
+        "username": "jimmyfallon",
+        "email": "jimmy@test.com",
+    }
+    for key, value in partial_create_params.items():
+        assert user[key] == value
+    
+    
     sign_in_params = {
-        'grant_type': None,
-        'username': 'richard',
-        'password': 'richard123',
-        'scope': "",
-        'client_id': None,
-        "client_secret": None,
+        'username': 'jimmyfallon',
+        'password': 'jimmy123',
     }
     response = client.post(f"/auth/token", data=sign_in_params)
     assert response.status_code == 200
