@@ -47,7 +47,7 @@ def get_chats(
 
 
 
-@chats_router.get("/{chat_id}", response_model=ChatResponse)
+@chats_router.get("/{chat_id}", response_model=ChatResponse, response_model_exclude_none=True)
 def get_chat(
     chat_id: int,
     include: list[str] = Query(None),
