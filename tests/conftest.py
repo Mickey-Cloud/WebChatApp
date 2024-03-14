@@ -36,7 +36,9 @@ def logged_in_client(session, user_fixture):
         return session
 
     def _get_current_user_override():
-        return user_fixture(username="miguel")
+        return user_fixture(username="miguel",
+                            email="migi@test.test",
+                            password="miguelpassword")
 
     app.dependency_overrides[db.get_session] = _get_session_override
     app.dependency_overrides[auth.get_current_user] = _get_current_user_override
@@ -50,7 +52,7 @@ def user_fixture(session):
     def _build_user(
         username: str = "miguel",
         email: str = "migi@test.test",
-        password: str = "password",
+        password: str = "miguelpassword",
     )-> db.UserInDB:
         return auth.register_new_user(
             auth.UserRegistration(

@@ -76,7 +76,7 @@ def get_current_user(
     return user
 
 
-@auth_router.post("/registration", response_model=UserResponse)
+@auth_router.post("/registration", response_model=UserResponse, status_code=201)
 def register_new_user(
     registration: UserRegistration,
     session: Annotated[Session, Depends(db.get_session)],
@@ -98,7 +98,7 @@ def register_new_user(
     session.add(user)
     session.commit()
     session.refresh(user)
-    return UserResponse(user = user)
+    return (UserResponse(user = user))
 
 
 @auth_router.post("/token", response_model=AccessToken)

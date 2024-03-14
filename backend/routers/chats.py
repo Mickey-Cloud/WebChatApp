@@ -168,7 +168,7 @@ def get_users_in_chat(
         users=sorted(users, key=sort_key)
     )
     
-@chats_router.post("/{chat_id}/messages", response_model=Message)
+@chats_router.post("/{chat_id}/messages", response_model=Message, status_code=201)
 def post_message_to_chat(
     new_message: MessageNew,
     chat_id: int,

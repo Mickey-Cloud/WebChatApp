@@ -140,3 +140,43 @@ def test_user_dne_get_user_chats(client, session, default_users):
     }
 
 
+def test_get_auth_token(client, session, default_users):
+    session.add_all(default_users)
+    session.commit()
+    
+    sign_in_params = {
+        'grant_type': None,
+        'username': 'richard',
+        'password': 'richard123',
+        'scope': "",
+        'client_id': None,
+        "client_secret": None,
+    }
+    response = client.post(f"/auth/token", data=sign_in_params)
+    assert response.status_code == 200
+    
+    token = response.json()
+    assert token["access_token"] != None
+    assert token["token_type"] == "Bearer"
+    assert token["expires_in"] == 3600
+
+def test_get_me(default_database, logged_in_client):
+    response = logged_in_client.get("/users/me")
+    assert response.status_code == 200
+    user = response.json()["user"]
+    assert user["username"] == "miguel"
+
+def test_get_current_user_not_logged_in(client):
+    response = client.get("/users/me")
+    assert response.status_code == 401
+    assert response.json() == {
+        "detail": "Not authenticated"
+    }
+    
+def test_post_new_message(default_database, logged_in_client ):
+    message = {
+        'text': "new message"
+    }
+    response = logged_in_client.post("/chats/1/messages", json=message)
+    assert response.status_code == 201
+    
