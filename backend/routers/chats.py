@@ -19,9 +19,8 @@ from backend.schema import(
     ChatMetadata, 
     Chat,  
     MessageCollection,
-    MessageInDB,
+    MessageResponse,
     MessageNew,
-    Message,
     UserCollection,
     UserInDB
 )
@@ -168,7 +167,7 @@ def get_users_in_chat(
         users=sorted(users, key=sort_key)
     )
     
-@chats_router.post("/{chat_id}/messages", response_model=Message, status_code=201)
+@chats_router.post("/{chat_id}/messages", response_model=MessageResponse, status_code=201)
 def post_message_to_chat(
     new_message: MessageNew,
     chat_id: int,
@@ -177,4 +176,4 @@ def post_message_to_chat(
     ):
     """Adds a message to the chat by the currently logged in user"""
     
-    return db.post_message(session, chat_id, user.id, new_message.text)
+    return MessageResponse(message = db.post_message(session, chat_id, user.id, new_message.text))

@@ -88,6 +88,9 @@ class Message(BaseModel):
     chat_id: int
     user: User
     created_at: datetime
+    
+class MessageResponse(BaseModel):
+    message: Message
 
 class MessageCollection(BaseModel):
     """Represents an API response for a collection of Messages"""
