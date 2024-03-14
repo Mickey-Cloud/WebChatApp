@@ -139,7 +139,6 @@ def test_user_dne_get_user_chats(client, session, default_users):
         }
     }
 
-
 def test_get_auth_token(client, session, default_users):
     session.add_all(default_users)
     session.commit()
