@@ -177,7 +177,7 @@ def test_get_me(default_database, logged_in_client):
     response = logged_in_client.get("/users/me")
     assert response.status_code == 200
     user = response.json()["user"]
-    assert user["username"] == "miguel"
+    assert user["username"] == "richard"
 
 def test_get_current_user_not_logged_in(client):
     response = client.get("/users/me")
