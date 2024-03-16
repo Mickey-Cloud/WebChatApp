@@ -6,6 +6,9 @@ from fastapi import APIRouter, Depends
 from sqlmodel import Session
 
 from backend.auth import get_current_user
+from backend.helpers import (
+    chatsInDB_to_chats
+)
 
 from backend.schema import(
     UserCollection,
@@ -69,7 +72,9 @@ def get_user_chats(
     """Gets all the chats pertaining to a specific user"""
     
     sort_key = lambda chat: getattr(chat, sort)
-    chats = db.get_user_chats(session, user_id)
+    chatList = db.get_user_chats(session, user_id)
+    
+    chats = chatsInDB_to_chats(chatList=chatList)
     return ChatCollection(
         meta={"count": len(chats)},
         chats=sorted(chats, key=sort_key),

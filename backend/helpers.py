@@ -1,5 +1,3 @@
-from sqlmodel import Session
-
 from backend import database as db
 from backend.schema import (
     UserInDB,
@@ -15,29 +13,28 @@ from backend.schema import (
 )
 
 def chatInDB_to_chat(chat: ChatInDB):
-  return Chat(
+    return Chat(
             id=chat.id,
             name=chat.name,
             owner=chat.owner,
             created_at=chat.created_at
         )
 
-def chatsInDB_to_chats(session: Session) -> list[Chat]:
-    chats = db.get_chats(session)
+def chatsInDB_to_chats(chatList = list[ChatInDB]) -> list[Chat]:
     newChatList = []
-    for chat in chats:
+    for chat in chatList:
         newChatList.append(chatInDB_to_chat(chat))
     return newChatList
 
 def messageInDB_to_Message(message = MessageInDB) -> Message:
-  return Message(
+    return Message(
             id=message.id,
             text=message.text,
             chat_id=message.chat_id,
             user=message.user,
             created_at=message.created_at
         )
-  
+    
 def from_MessagesInDB_to_Messages(messageList = list[MessageInDB]) -> list[Message]:
     newMessageList = []
     for message in messageList:

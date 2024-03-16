@@ -39,7 +39,8 @@ def get_chats(
     """Gets all the chats"""
     
     sort_key = lambda chat: getattr(chat, sort)
-    chats = chatsInDB_to_chats(session)
+    chatList = db.get_chats(session)
+    chats = chatsInDB_to_chats(chatList=chatList)
     return ChatCollection(
         meta={"count": len(chats)},
         chats=sorted(chats, key=sort_key),

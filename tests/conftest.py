@@ -31,14 +31,15 @@ def client(session):
     app.dependency_overrides.clear()
     
 @pytest.fixture
-def logged_in_client(session, user_fixture):
+def logged_in_client(session, default_users):
     def _get_session_override():
         return session
 
     def _get_current_user_override():
-        return user_fixture(username="miguel",
-                            email="migi@test.test",
-                            password="miguelpassword")
+        return default_users[0]
+        # return user_fixture(username="miguel",
+        #                     email="migi@test.test",
+        #                     password="miguelpassword")
 
     app.dependency_overrides[db.get_session] = _get_session_override
     app.dependency_overrides[auth.get_current_user] = _get_current_user_override
