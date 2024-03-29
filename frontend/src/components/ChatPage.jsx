@@ -1,6 +1,5 @@
 import { useQuery } from "react-query";
 import { Link, useParams } from "react-router-dom";
-import "./ChatPage.css";
 import { useState } from "react";
 
 function ChatListItem({ chat, onClick }) {
@@ -11,7 +10,7 @@ function ChatListItem({ chat, onClick }) {
         {chat.name}
       </div>
       <div className="chat-list-item-detail">
-        Participants: <br/>{chat.user_ids.join(", ")}
+        Owner: {chat.owner.username}
       </div>
       <div className="chat-list-item-detail">
         Date: {new Date(chat.created_at).toLocaleDateString()}
