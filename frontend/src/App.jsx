@@ -1,8 +1,9 @@
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { BrowserRouter, NavLink, Navigate, Routes, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from "./context/auth";
-import { UserProvider, useUser } from './context/user';
+import { UserProvider } from './context/user';
 
+import Home from "./components/Home"
 import Registration from "./components/Registration";
 import Profile from "./components/Profile";
 import ChatPage from './components/ChatPage';
@@ -13,18 +14,6 @@ const queryClient = new QueryClient();
 
 function NotFound() {
   return <h1>404: not found</h1>;
-}
-
-function Home() {
-  const { isLoggedIn, logout } = useAuth();
-
-  return (
-    <div className="max-w-4/5 mx-auto text-center px-4 py-8">
-      <div className="py-2">
-        logged in: {isLoggedIn.toString()}
-      </div>
-    </div>
-  );
 }
 
 function Header() {
@@ -38,7 +27,7 @@ function Header() {
 function AuthenticatedRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<Navigate to="/chats" />} />
       <Route path="/chats" element={<ChatPage />}>
         <Route path="/chats/:chatId" element={<ChatPage />} />
       </Route>
@@ -80,7 +69,7 @@ function Main(){
 function App() {
   const className = [
     "h-screen max-h-screen",
-    "max-w-2xl mx-auto",
+    "max-w-5xxl mx-auto",
     "bg-gray-700 text-white",
     "flex flex-col",
   ].join(" ");

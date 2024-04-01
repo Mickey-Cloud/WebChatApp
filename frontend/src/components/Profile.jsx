@@ -9,12 +9,14 @@ function Profile() {
   const user = useUser();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
+  const [createdAt, setCreatedAt] = useState("");
   const [readOnly, setReadOnly] = useState(true);
 
   const reset = () => {
     if (user) {
       setUsername(user.username);
       setEmail(user.email);
+      setCreatedAt(user.created_at);
     }
   }
 
@@ -35,23 +37,30 @@ function Profile() {
   return (
     <div className="max-w-96 mx-auto px-4 py-8">
       <h2 className="text-2xl font-bold py-2">
-        details
+        User Info
       </h2>
       <form className="border rounded px-4 py-2" onSubmit={onSubmit}>
         <FormInput
-          name="username"
+          name="Username"
           type="text"
           value={username}
           readOnly={readOnly}
           setter={setUsername}
         />
         <FormInput
-          name="email"
+          name="Email"
           type="email"
           value={email}
           readOnly={readOnly}
           setter={setEmail}
         />
+        <FormInput
+          name="Member Since"
+          type="text"
+          value={new Date(createdAt).toLocaleDateString()}
+          readOnly={true}
+          setter={setCreatedAt}
+          />
         {!readOnly &&
           <Button className="mr-8" type="submit">
             update

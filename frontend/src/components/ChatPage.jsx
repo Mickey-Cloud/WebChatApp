@@ -1,38 +1,14 @@
 import { useQuery } from "react-query";
 import { Link, useParams } from "react-router-dom";
-import { useState } from "react";
+import { useUser } from "../context/user";
 
-function ChatListItem({ chat, onClick }) {
-  
-  return (
-    <Link key={chat.id} to={`/chats/${chat.id}`} className="chat-list-item" onClick={onClick}>
-      <div className="chat-list-item-name">
-        {chat.name}
-      </div>
-      <div className="chat-list-item-detail">
-        Owner: {chat.owner.username}
-      </div>
-      <div className="chat-list-item-detail">
-        Date: {new Date(chat.created_at).toLocaleDateString()}
-      </div>
-    </Link>
-  )
-}
-
-function ChatList({ chats, setMessageName}) {
-  return (
-    <div className="chat-list">
-      {chats.map((chat) => (
-        <ChatListItem key={chat.id} chat={chat}  onClick={() => setMessageName(chat.name)} />
-      ))}
-    </div>
-  )
-}
+import LeftNav from "./LeftNav";
+import NewChat from "./NewChat";
 
 function MessageList({ messages }){
   return(
-    <div className="message-list-container">
-      <div className="message-list">
+    <div className=" px-2 py-3 rounded-md">
+      <div className="maxHeight-chat">
         { messages.map((message) =>
           <MessageCard key={message.id} message={message}/>
         )}
@@ -43,55 +19,51 @@ function MessageList({ messages }){
 
 function MessageCard({ message }) {
   const date = new Date(message.created_at)
+  const user = useUser();
+  const username = user.username;
 
   return (
-    <div className="message-box">
-      <div>
-        <span className="message-user" >{message.user_id}</span>
-        <span className="message-date-time">{date.toDateString()  + "    -   " + date.toLocaleTimeString()} </span>
-      </div>
-      <div className="message-container">
-        <div className="message">
-          {message.text}
+    <>
+    {message.user.username == username ?
+      <div className="px-1 py-1 rounded">
+        <div className="flex flex-box">
+          <div className="flex-1"/>
+          <span className="text-xs text-transparent  hover:text-white">{date.toDateString()  + "    -   " + date.toLocaleTimeString()} </span>
+        </div>
+        <div className="flex flex-box">
+          <div className="flex-1"/>
+          <div className="border border-pink-800 rounded-xl px-1 max-w-[80%] py-2 w-fit bg-fuchsia-800">
+            {message.text}
+          </div>
         </div>
       </div>
-    </div>
+        :
+      <div className="px-1 py-1 rounded">
+        <div className="flex flex-box w-full">
+          <span className="font-bold text-xs" >{message.user.username}</span>
+          <div className="flex-1"/>
+          <span className="text-xs text-transparent hover:text-white">{date.toDateString()  + "    -   " + date.toLocaleTimeString()} </span>
+        </div>
+        <div className="flex flex-box">
+          <div className="border border-fuchsia-800 rounded-xl max-w-[80%] px-1 py-2 w-fit bg-pink-700">
+            {message.text}
+          </div>
+        </div>
+      </div>
+    }
+    </>
   )
 }
 
-function ChatCardContainer({ messages, messageName }) {
+function ChatCardContainer({ messages,  }) {
   return (
-    <div className="chat-card-container">
-      <h2>{messageName}</h2>
+    <div className="overflow-y-scroll h-main">
       <MessageList messages={messages} />
     </div>
   );
 }
 
-function ChatListContainer( {setMessageName}) {
-  const { data } = useQuery({
-    queryKey: ["chats"],
-    queryFn: () => (
-      fetch("http://127.0.0.1:8000/chats")
-        .then((response) => response.json())
-    ),
-  });
-
-  if (data?.chats) {
-    return (
-      <div className="chat-list-container">
-        <h2>Chats</h2>
-        <ChatList chats={data.chats} setMessageName={setMessageName} />
-      </div>
-    )
-  }
-
-  return (
-    <h2>Chat List</h2>
-  );
-}
-
-function ChatCardQueryContainer({ chatId, messageName }) {
+function ChatCardQueryContainer({ chatId,  }) {
   const { data } = useQuery({
     queryKey: ["chats", chatId],
     queryFn: () => (
@@ -101,7 +73,7 @@ function ChatCardQueryContainer({ chatId, messageName }) {
   });
 
   if (data && data.messages) {
-    return <ChatCardContainer messages={data.messages} messageName={messageName} />
+    return <ChatCardContainer messages={data.messages}  />
   }
 
   return <h2>loading...</h2>
@@ -109,13 +81,20 @@ function ChatCardQueryContainer({ chatId, messageName }) {
 
 function ChatPage() {
   const { chatId } = useParams();
-  const [MessageName, setMessageName] = useState(
-    "none",
-  );
   return (
-    <div className="chats-page">
-      <ChatListContainer setMessageName={setMessageName}/>
-      {chatId ? <ChatCardQueryContainer chatId={chatId} messageName={MessageName} /> : <h2>Select a chat</h2>}
+    <div className="flex flex-row h-main">
+      <div className="w-40">
+        <LeftNav/>
+      </div>
+      <div>
+        {chatId ? 
+        <div className="">
+          <ChatCardQueryContainer chatId={chatId}  /> 
+          <NewChat chatId={chatId}/>
+        </div>
+        : 
+        <h2>Select a chat</h2>}
+      </div>
     </div>
   );
 }

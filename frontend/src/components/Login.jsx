@@ -55,8 +55,7 @@ function Login() {
       },
     ).then((response) => {
       if (response.ok) {
-        response.json().then(login);
-        navigate("/");
+        response.json().then(login).then(()=>navigate("/chats"));
       } else if (response.status === 401) {
         response.json().then((data) => {
           setError(data.detail.error_description);
