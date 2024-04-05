@@ -4,14 +4,14 @@ import { useUser } from "../context/user";
 
 function NavItem({ to, name, right }) {
   const className = [
-    "border-purple-400",
+    "border-fuchsia-800",
     "py-2 px-4",
-    "hover:bg-slate-800",
+    "hover:bg-slate-700",
     right ? "border-l-2" : "border-r-2"
   ].join(" ")
 
   const getClassName = ({ isActive }) => (
-    isActive ? className + " bg-slate-800" : className
+    isActive ? className + " bg-slate950" : className
   );
 
   return (
@@ -50,7 +50,7 @@ function TopNav() {
   const { isLoggedIn } = useAuth();
 
   return (
-    <nav className="flex flex-row border-b-4 border-purple-400">
+    <nav className="flex flex-row border-b-4 border-fuchsia-800">
       {isLoggedIn ?
         <AuthenticatedNavItems /> :
         <UnauthenticatedNavItems />

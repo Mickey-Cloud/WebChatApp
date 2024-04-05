@@ -5,7 +5,7 @@ function Button(props) {
     "px-4 py-2 my-4",
     props.disabled ?
       "bg-slate-500 italic" :
-      "border-lgrn bg-transparent hover:bg-slate-800",
+      "border-rose-400 bg-transparent hover:bg-slate-800",
   ].join(" ");
 
   return (

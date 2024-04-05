@@ -70,7 +70,7 @@ function App() {
   const className = [
     "h-screen max-h-screen",
     "max-w-5xxl mx-auto",
-    "bg-gray-700 text-white",
+    "bg-gray-900 text-white",
     "flex flex-col",
   ].join(" ");
 

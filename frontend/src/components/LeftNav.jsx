@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useQuery } from "react-query";
+import { useRef } from "react";
 
 const emptyChat = (id) => ({
   id,
@@ -48,9 +49,23 @@ function LeftNav() {
     search === "" || regex.test(chat.name)
   ));
 
+  const outerRef = useRef(0);
+  const innerRef = useRef(0);
+  const outerHeight = outerRef.current.clientHeight;
+  const innerHeight = innerRef.current.clientHeight;
+
+  const leftNavScrollClass = [
+    "flex flex-col",
+    "border-b-2",
+    "border-purple-400",
+    (innerHeight+60 >= outerHeight)?
+    "overflow-y-scroll":
+    "overflow-y-hidden"
+  ].join(" ");
+
   return (
-    <nav className="flex flex-col border-r-2 border-purple-400 h-main">
-      <div className="flex flex-col overflow-y-scroll border-b-2 border-purple-400">
+    <nav ref={outerRef} className="flex flex-col border-r-2 border-purple-400 h-main">
+      <div ref={innerRef} className={leftNavScrollClass} >
         {chats.map((chat) => (
           <Link key={chat.id} chat={chat} />
         ))}

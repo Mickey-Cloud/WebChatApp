@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "react-query";
 import { useAuth } from "../context/auth";
 import { useUser } from "../context/user";
+import { useNavigate } from "react-router-dom";
+import { useApi } from "../hooks";
 import Button from "./Button";
 import FormInput from "./FormInput";
 
@@ -19,13 +22,33 @@ function Profile() {
       setCreatedAt(user.created_at);
     }
   }
-
+  
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   useEffect(reset, [user]);
+  const api = useApi();
+
+  const mutation = useMutation({
+    mutationFn: () => (
+      api.put(
+        `/users/me`,
+        {
+          username,
+          email
+        }
+      ).then((response) => response.json())
+    ),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["users"]
+      });
+      navigate(`/profile`);
+    },
+  });
 
   const onSubmit = (e) => {
     e.preventDefault();
-    console.log("username: " + username);
-    console.log("email: " + email);
+    mutation.mutate()
     setReadOnly(true);
   }
 

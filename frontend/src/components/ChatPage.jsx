@@ -1,7 +1,8 @@
 import { useQuery } from "react-query";
 import { Link, useParams } from "react-router-dom";
+import { useEffect, useRef } from "react";
 import { useUser } from "../context/user";
-
+import ScrollContainer from "./ScrollContainer"
 import LeftNav from "./LeftNav";
 import NewChat from "./NewChat";
 
@@ -57,9 +58,9 @@ function MessageCard({ message }) {
 
 function ChatCardContainer({ messages,  }) {
   return (
-    <div className="overflow-y-scroll h-main">
-      <MessageList messages={messages} />
-    </div>
+    <ScrollContainer>
+        <MessageList messages={messages} />
+    </ScrollContainer>
   );
 }
 

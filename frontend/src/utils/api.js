@@ -24,6 +24,17 @@ const api = (token) => {
     )
   );
 
+  const put = (url, body) =>(
+    fetch(
+      baseUrl + url,
+      {
+        method: "PUT",
+        body: JSON.stringify(body),
+        headers,
+      }
+    )
+  )
+
   const postForm = (url, body) => (
     fetch(
       baseUrl + url,
@@ -38,7 +49,7 @@ const api = (token) => {
     )
   );
 
-  return { get, post, postForm };
+  return { get, post, put, postForm };
 };
 
 export default api;
