@@ -150,7 +150,13 @@ def post_new_chat(session: Session, name: str, owner_id: int)-> ChatResponseSm:
     session.add(newChat)
     session.commit()
     session.refresh(newChat)
-    return ChatResponseSm(**newChat.model_dump())
+    nChat = Chat(
+        id=newChat.id,
+        name=newChat.name,
+        owner=newChat.owner,
+        created_at=newChat.created_at
+        )
+    return ChatResponseSm(chat=nChat)
 
 def put_chat_name_update(session: Session, chat_id: int, chat_update: ChatUpdate) -> Chat:
     """
