@@ -15,6 +15,7 @@ from backend.schema import (
     ChatInDB,
     ChatUpdate,
     ChatCollection,
+    ChatResponseSm,
     MessageInDB,
     Message,
     
@@ -44,7 +45,6 @@ class DuplicateEntityException(Exception):
     def __init__(self, *, entity_name: str, entity_id: str):
         self.entity_name = entity_name
         self.entity_id = entity_id
-
 
 #   -------- users --------   #
 
@@ -132,6 +132,25 @@ def get_chat_by_id(session: Session, chat_id: int) -> ChatInDB:
         return chat
 
     raise EntityNotFoundException(entity_name="Chat", entity_id=chat_id)
+
+def post_new_chat(session: Session, name: str, owner_id: int)-> ChatResponseSm:
+    """Creates a new chat
+
+    Args:
+        session (Session): database session
+
+    Returns:
+        ChatResponseSm: The created chat
+    """
+    
+    newChat = ChatInDB(
+        name=name,
+        owner_id=owner_id
+    )
+    session.add(newChat)
+    session.commit()
+    session.refresh(newChat)
+    return ChatResponseSm(**newChat.model_dump())
 
 def put_chat_name_update(session: Session, chat_id: int, chat_update: ChatUpdate) -> Chat:
     """

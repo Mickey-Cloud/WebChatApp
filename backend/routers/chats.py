@@ -178,3 +178,16 @@ def post_message_to_chat(
     """Adds a message to the chat by the currently logged in user"""
     
     return MessageResponse(message = db.post_message(session, chat_id, user.id, new_message.text))
+
+@chats_router.post("", response_model=ChatResponseSm)
+def post_create_chat(
+    name: str,
+    user: UserInDB = Depends(get_current_user),
+    session: Session = Depends(db.get_session)
+):
+    """Adds a chat with the logged in user as the owner
+
+    Args:
+        name (str): The name of the added chat
+    """
+    return db.post_new_chat(session, name, user.id)

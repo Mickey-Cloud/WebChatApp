@@ -46,6 +46,27 @@ class AuthException(HTTPException):
             },
         )
 
+class NoPermissionChat(AuthException):
+    def __init__(self):
+        super().__init__(
+            error="no_permission",
+            description="requires permission to edit chat"
+        )
+        
+class NoPermissionChatMembers(AuthException):
+    def __init__(self):
+        super().__init__(
+            error="no_permission",
+            description="requires permission to edit chat members"
+        )
+
+class InvalidState(AuthException):
+    def __init__(self):
+        super().__init__(
+            error="invalid_state",
+            description="owner of a chat cannot be removed"
+        )
+        
 class InvalidCredentials(AuthException):
     def __init__(self):
         super().__init__(
