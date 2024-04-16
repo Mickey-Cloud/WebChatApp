@@ -132,6 +132,7 @@ def get_chat(
 def update_chat(
     chat_id: int,
     chat_update: ChatUpdate,
+    user: UserInDB = Depends(get_current_user),
     session: Session = Depends(db.get_session)
     ):
     """Changes the name of the given chat"""
@@ -179,7 +180,7 @@ def post_message_to_chat(
     
     return MessageResponse(message = db.post_message(session, chat_id, user.id, new_message.text))
 
-@chats_router.post("", response_model=ChatResponseSm)
+@chats_router.post("", response_model=ChatResponseSm, status_code=201)
 def post_create_chat(
     name: str,
     user: UserInDB = Depends(get_current_user),
@@ -191,3 +192,35 @@ def post_create_chat(
         name (str): The name of the added chat
     """
     return db.post_new_chat(session, name, user.id)
+
+@chats_router.put("/{chat_id}/users/{user_id}", response_model=UserCollection, status_code=201)
+def put_new_chat_user(
+    chat_id: int,
+    user_id: int,
+    user: UserInDB = Depends(get_current_user),
+    session: Session = Depends(db.get_session)
+):
+    """Adds a user to the specified chat
+
+    Args:
+        chat_id (int): The chat to add the user to
+        user_id (int): the user to add to the chat
+    """
+    
+    return db.put_new_chat_user(session, chat_id, user_id, user.id)
+
+@chats_router.delete("/{chat_id}/users/{user_id}", response_model=UserCollection)
+def delete_user_chat_link(
+    chat_id: int,
+    user_id: int,
+    user: UserInDB = Depends(get_current_user),
+    session: Session = Depends(db.get_session)
+):
+    """Removes a User from a chat
+
+    Args:
+        chat_id (int): The chat to remove the user from
+        user_id (int): The Id of the user to be removed from the chat
+    """
+    
+    return db.delete_user_chat_link()

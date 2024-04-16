@@ -49,6 +49,7 @@ class AuthException(HTTPException):
 class NoPermissionChat(AuthException):
     def __init__(self):
         super().__init__(
+            status_code=403,
             error="no_permission",
             description="requires permission to edit chat"
         )
@@ -63,6 +64,7 @@ class NoPermissionChatMembers(AuthException):
 class InvalidState(AuthException):
     def __init__(self):
         super().__init__(
+            status_code=422,
             error="invalid_state",
             description="owner of a chat cannot be removed"
         )

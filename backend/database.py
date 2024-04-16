@@ -2,6 +2,8 @@ from datetime import datetime
 
 from sqlmodel import Session, SQLModel, create_engine, select
 
+from auth import NoPermissionChat, NoPermissionChatMembers, InvalidState
+
 from backend.helpers import(
     from_MessagesInDB_to_Messages,
     messageInDB_to_Message,
@@ -11,6 +13,8 @@ from backend.schema import (
     UserInDB,
     UserRegistration,
     UserUpdate,
+    UserChatLinkInDB,
+    UserCollection,
     Chat,
     ChatInDB,
     ChatUpdate,
@@ -158,7 +162,7 @@ def post_new_chat(session: Session, name: str, owner_id: int)-> ChatResponseSm:
         )
     return ChatResponseSm(chat=nChat)
 
-def put_chat_name_update(session: Session, chat_id: int, chat_update: ChatUpdate) -> Chat:
+def put_chat_name_update(session: Session, chat_id: int, owner_id: int, chat_update: ChatUpdate) -> Chat:
     """
     Update the Name of a Chat
 
@@ -167,6 +171,8 @@ def put_chat_name_update(session: Session, chat_id: int, chat_update: ChatUpdate
         chat_update (ChatUpdate): the name to update in the chat
     """
     chat = get_chat_by_id(session, chat_id)
+    if(chat.id != owner_id):
+        raise NoPermissionChat()
     for key, value in chat_update:
         setattr(chat, key, value)
     session.add(chat)
@@ -220,6 +226,73 @@ def get_chat_users(session: Session, chat_id: int) -> list[UserInDB]:
     
     users = chat.users
     return users
+
+def put_new_chat_user(session: Session, chat_id: int, user_id: int, owner_id:int) -> UserCollection:
+    """Puts a new user in a chat
+
+    Args:
+        chat_id (int): Id of the chat to add the user to
+        user_id (int): Id of the user to add to the chat
+        owner_id (int): Id of the owner of the chat
+
+    Returns:
+        UserCollection: A list of all the users that belong to the chat
+    """
+    chat = get_chat_by_id(session,chat_id)
+    if(chat.id != owner_id):
+        raise NoPermissionChatMembers()
+    get_user_by_id(session,user_id)
+    result = session.exec(select(UserChatLinkInDB).where(UserChatLinkInDB.user_id == user_id).where(chat_id))
+    if(result is not None):
+        usersInChat = get_chat_users(session, chat_id)
+        return UserCollection(
+            meta=usersInChat.count(),
+            users=usersInChat
+            )
+    link = UserChatLinkInDB(user_id, chat_id)
+    session.add(link)
+    session.commit()
+    session.refresh(link)
+    usersInChat = get_chat_users(session, chat_id)
+    return UserCollection(
+        meta=usersInChat.count(),
+        users=usersInChat
+        )
+    
+def delete_user_chat_link(session: Session, chat_id: int, user_id: int, owner_id: int) -> UserCollection:
+    """Removea a user from a chat
+
+    Args:
+        chat_id (int): id of the chat to remove the user from
+        user_id (int): id of the user to be removed from the chat
+        owner_id (int): id of the owner of the chat
+
+    Returns:
+        UserCollection: a collection of all the users left in the chat
+    """
+    chat = get_chat_by_id(session,chat_id)
+    if(chat.id != owner_id):
+        raise NoPermissionChatMembers()
+    if(user_id == owner_id):
+        raise InvalidState()
+    get_user_by_id(session,user_id)
+    result = session.exec(select(UserChatLinkInDB).where(UserChatLinkInDB.user_id == user_id).where(chat_id))
+    if(result is not None):
+        usersInChat = get_chat_users(session, chat_id)
+        return UserCollection(
+            meta=usersInChat.count(),
+            users=usersInChat
+            )
+    link = UserChatLinkInDB(user_id, chat_id)
+    session.add(link)
+    session.commit()
+    session.refresh(link)
+    usersInChat = get_chat_users(session, chat_id)
+    return UserCollection(
+        meta=usersInChat.count(),
+        users=usersInChat
+        )
+    
 
 def post_message(session: Session, chat_id: int, user_id: int, text: str) -> MessageInDB:
     """
