@@ -70,6 +70,9 @@ function LeftNav() {
           <Link key={chat.id} chat={chat} />
         ))}
       </div>
+      <div className="my-5">
+        <NavLink className="p-1 rounded bg-red-900 text-pint-200 border-fuchsia-800 border m-2 hover:bg-red-500" to={"/chats/new"}>New Chat</NavLink>
+      </div>
       <div className="p-2">
         <input
           className="w-36 px-4 py-2 bg-gray-700 border border-gray-500"

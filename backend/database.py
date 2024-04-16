@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from sqlmodel import Session, SQLModel, create_engine, select
+from fastapi import HTTPException
 
-from auth import NoPermissionChat, NoPermissionChatMembers, InvalidState
+from sqlmodel import Session, SQLModel, create_engine, select
 
 from backend.helpers import(
     from_MessagesInDB_to_Messages,
@@ -40,6 +40,16 @@ def get_session():
     with Session(engine) as session:
         yield session
 
+class PermissionException(HTTPException):
+    def __init__(self, status_code: int, error: str, description: str):
+        super().__init__(
+            status_code=status_code,
+            detail={
+                "error": error,
+                "error_description": description,
+            },
+        )
+
 class EntityNotFoundException(Exception):
     def __init__(self, *, entity_name: str, entity_id: str):
         self.entity_name = entity_name
@@ -49,7 +59,30 @@ class DuplicateEntityException(Exception):
     def __init__(self, *, entity_name: str, entity_id: str):
         self.entity_name = entity_name
         self.entity_id = entity_id
+class NoPermissionChat(PermissionException):
+    def __init__(self):
+        super().__init__(
+            status_code=403,
+            error="no_permission",
+            description="requires permission to edit chat"
+        )
+        
+class NoPermissionChatMembers(PermissionException):
+    def __init__(self):
+        super().__init__(
+            status_code=403,
+            error="no_permission",
+            description="requires permission to edit chat members"
+        )
 
+class InvalidState(PermissionException):
+    def __init__(self):
+        super().__init__(
+            status_code=422,
+            error="invalid_state",
+            description="owner of a chat cannot be removed"
+        )
+        
 #   -------- users --------   #
 
 

@@ -1,10 +1,10 @@
 import { useQuery } from "react-query";
-import { Link, useParams } from "react-router-dom";
+import { Link, NavLink, useParams } from "react-router-dom";
 import { useEffect, useRef } from "react";
 import { useUser } from "../context/user";
 import ScrollContainer from "./ScrollContainer"
 import LeftNav from "./LeftNav";
-import NewChat from "./NewChat";
+import NewMessage from "./NewMessage";
 
 function MessageList({ messages }){
   return(
@@ -56,11 +56,20 @@ function MessageCard({ message }) {
   )
 }
 
-function ChatCardContainer({ messages,  }) {
+function ChatCardContainer({ messages, chatId }) {
+  const url = `/chats/${chatId}/details`
+  
   return (
-    <ScrollContainer>
+    <div>
+      <div className="flex flex-box w-full">
+      <div className="flex-1"/>
+      <NavLink to={url} className="rounded bg-red-900 text-pink-100 px-2 py-1">Settings</NavLink>
+      </div>
+      <ScrollContainer>
         <MessageList messages={messages} />
-    </ScrollContainer>
+      </ScrollContainer>
+    </div>
+    
   );
 }
 
@@ -74,7 +83,7 @@ function ChatCardQueryContainer({ chatId,  }) {
   });
 
   if (data && data.messages) {
-    return <ChatCardContainer messages={data.messages}  />
+    return <ChatCardContainer messages={data.messages} chatId={chatId} />
   }
 
   return <h2>loading...</h2>
@@ -91,7 +100,7 @@ function ChatPage() {
         {chatId ? 
         <div className="">
           <ChatCardQueryContainer chatId={chatId}  /> 
-          <NewChat chatId={chatId}/>
+          <NewMessage chatId={chatId}/>
         </div>
         : 
         <h2>Select a chat</h2>}

@@ -9,6 +9,8 @@ import Profile from "./components/Profile";
 import ChatPage from './components/ChatPage';
 import TopNav from "./components/TopNav";
 import Login from "./components/login";
+import ChatDetails from './components/ChatDetails';
+import NewChat from './components/NewChat';
 
 const queryClient = new QueryClient();
 
@@ -29,8 +31,10 @@ function AuthenticatedRoutes() {
     <Routes>
       <Route path="/" element={<Navigate to="/chats" />} />
       <Route path="/chats" element={<ChatPage />}>
-        <Route path="/chats/:chatId" element={<ChatPage />} />
+        <Route path="/chats/:chatId" element={<ChatPage />}/>
       </Route>
+      <Route path="/chats/new" element={<NewChat/>}/>
+      <Route path="/chats/:chatId/details" element={<ChatDetails />}/>
       <Route path="/profile" element={<Profile />}/>
       <Route path="/error/404" element={<NotFound />} />
       <Route path="*" element={<Navigate to="/error/404" />} />

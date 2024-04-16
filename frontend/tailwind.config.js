@@ -9,7 +9,7 @@ export default {
   theme: {
     extend: {
       height: {
-        main: "calc(100vh - 128px)",
+        main: "calc(100vh - 144px)",
       },
       maxHeight: {
         main: "calc(100vh - 128px)",
