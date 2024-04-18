@@ -184,6 +184,8 @@ def post_new_chat(session: Session, name: str, owner_id: int)-> ChatResponseSm:
         name=name,
         owner_id=owner_id
     )
+    owner = get_user_by_id(session, owner_id)
+    owner.chats.append(newChat)
     session.add(newChat)
     session.commit()
     session.refresh(newChat)
@@ -204,7 +206,7 @@ def put_chat_name_update(session: Session, chat_id: int, owner_id: int, chat_upd
         chat_update (ChatUpdate): the name to update in the chat
     """
     chat = get_chat_by_id(session, chat_id)
-    if(chat.id != owner_id):
+    if(chat.owner.id != owner_id):
         raise NoPermissionChat()
     for key, value in chat_update:
         setattr(chat, key, value)
@@ -272,23 +274,23 @@ def put_new_chat_user(session: Session, chat_id: int, user_id: int, owner_id:int
         UserCollection: A list of all the users that belong to the chat
     """
     chat = get_chat_by_id(session,chat_id)
-    if(chat.id != owner_id):
+    if(chat.owner.id != owner_id):
         raise NoPermissionChatMembers()
     get_user_by_id(session,user_id)
-    result = session.exec(select(UserChatLinkInDB).where(UserChatLinkInDB.user_id == user_id).where(chat_id))
-    if(result is not None):
+    result = session.exec(select(UserChatLinkInDB).where((UserChatLinkInDB.user_id == user_id) & (UserChatLinkInDB.chat_id == chat_id)))
+    if(result.first() != None):
         usersInChat = get_chat_users(session, chat_id)
         return UserCollection(
-            meta=usersInChat.count(),
+            meta={"count": len(usersInChat)},
             users=usersInChat
             )
-    link = UserChatLinkInDB(user_id, chat_id)
+    link = UserChatLinkInDB( user_id=user_id, chat_id=chat_id)
     session.add(link)
     session.commit()
     session.refresh(link)
     usersInChat = get_chat_users(session, chat_id)
     return UserCollection(
-        meta=usersInChat.count(),
+        meta={"count": len(usersInChat)},
         users=usersInChat
         )
     
@@ -304,25 +306,19 @@ def delete_user_chat_link(session: Session, chat_id: int, user_id: int, owner_id
         UserCollection: a collection of all the users left in the chat
     """
     chat = get_chat_by_id(session,chat_id)
-    if(chat.id != owner_id):
+    if(chat.owner.id != owner_id):
         raise NoPermissionChatMembers()
     if(user_id == owner_id):
         raise InvalidState()
     get_user_by_id(session,user_id)
-    result = session.exec(select(UserChatLinkInDB).where(UserChatLinkInDB.user_id == user_id).where(chat_id))
-    if(result is not None):
-        usersInChat = get_chat_users(session, chat_id)
-        return UserCollection(
-            meta=usersInChat.count(),
-            users=usersInChat
-            )
-    link = UserChatLinkInDB(user_id, chat_id)
-    session.add(link)
-    session.commit()
-    session.refresh(link)
+    result = session.exec(select(UserChatLinkInDB).where((UserChatLinkInDB.user_id == user_id) & (UserChatLinkInDB.chat_id == chat_id)))
+    link = result.first()
+    if(link != None):
+        session.delete(link)
+        session.commit()
     usersInChat = get_chat_users(session, chat_id)
     return UserCollection(
-        meta=usersInChat.count(),
+        meta={"count": len(usersInChat)},
         users=usersInChat
         )
     

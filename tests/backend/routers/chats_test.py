@@ -124,3 +124,9 @@ def test_get_chat_users_dne(client, default_database):
         }
     }
 
+def test_delete_user_chat_link(default_database, logged_in_client ):
+    message = {
+        'text': "new message"
+    }
+    response = logged_in_client.delete("/chats/1/users/2")
+    assert response.status_code == 200

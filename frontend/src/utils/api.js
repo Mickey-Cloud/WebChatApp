@@ -35,6 +35,16 @@ const api = (token) => {
     )
   )
 
+  const del = (url) =>{
+    fetch(
+      baseUrl + url,
+      {
+        method: "DELETE",
+        headers,
+      }
+    )
+  }
+
   const postForm = (url, body) => (
     fetch(
       baseUrl + url,
@@ -49,7 +59,7 @@ const api = (token) => {
     )
   );
 
-  return { get, post, put, postForm };
+  return { get, post, put, del, postForm };
 };
 
 export default api;

@@ -58,7 +58,6 @@ function MessageCard({ message }) {
 
 function ChatCardContainer({ messages, chatId }) {
   const url = `/chats/${chatId}/details`
-  
   return (
     <div>
       <div className="flex flex-box w-full">
