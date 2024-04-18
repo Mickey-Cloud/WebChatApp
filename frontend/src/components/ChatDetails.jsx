@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQueryClient, useQuery } from "react-query";
 import { useParams } from "react-router-dom";
 import { useApi, useUser } from "../hooks";
@@ -9,8 +9,9 @@ function DetailsContainer({chatId, }){
   const [owner_id, Owner] = useState("");
   const [checked, checking] = useState(false);
   const queryClient = useQueryClient();
+  const queryKey = ["chatsUsers", chatId]
   const { data } = useQuery({
-    queryKey: ["chatsUsers", chatId],
+    queryKey,
     queryFn: () => (
       fetch(`http://127.0.0.1:8000/chats/${chatId}?include=users`)
         .then((response) => response.json())
@@ -53,7 +54,7 @@ function ChatNameContainer({overallName, queryClient, chatId, isOwner}){
     ),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: ["chatsUsers"],
+        queryKey: ["chatsUsers", chatId],
       });
       setName("");
     },
@@ -88,7 +89,7 @@ function UserListContainer({members, queryClient, chatId, isOwner, ownerId}){
     ),
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: ["chatsUsers"]
+        queryKey: ["chatsUsers", chatId]
       });
       setMemberID("");
     },
@@ -103,11 +104,12 @@ function UserListContainer({members, queryClient, chatId, isOwner, ownerId}){
     mutationFn: () => (
       api.del(
         `/chats/${chatId}/users/${removeMember_id}`
-      )
+      ).then((response) => response.json())
     ),
     onSuccess: () => {
+      const queryKey = ["chatsUsers", chatId];
       queryClient.invalidateQueries({
-        queryKey: ["chatsUsers"]
+        queryKey,
       });
       removeMemberID("");
     },
@@ -119,7 +121,7 @@ function UserListContainer({members, queryClient, chatId, isOwner, ownerId}){
   }
   
   const { data } = useQuery({
-    queryKey: ["chatDetailsAllUsers"],
+    queryKey: ["users"],
     queryFn: () => (
       fetch(`http://127.0.0.1:8000/users`)
         .then((response) => response.json())
@@ -140,7 +142,7 @@ function UserListContainer({members, queryClient, chatId, isOwner, ownerId}){
         <div className="py-1 my-1">
           {
           members.map((user)=>
-              <form onSubmit={remove} className="flex flex-box w-full my-1">
+              <form key={user.id} onSubmit={remove} className="flex flex-box w-full my-1">
                 <label className={user.id == ownerId ? "text-green-300": ""}>{user.id == ownerId ? user.username + " - Owner": user.username + " - Member"}</label>
                 <div className={"flex-1"}/>
                 <button hidden={!isOwner} className="bg-red-700 rounded bold px-1 hover:bg-red-500" onClick={(e)=> removeMemberID(e.target.value)} value={user.id} type="submit">Remove</button>
@@ -155,7 +157,7 @@ function UserListContainer({members, queryClient, chatId, isOwner, ownerId}){
               <option value=""></option>
               {
                 result.map((user) => 
-                  <option value={user.id}>{user.username}</option>
+                  <option key={user.id} value={user.id}>{user.username}</option>
                 )
               }
             </select>

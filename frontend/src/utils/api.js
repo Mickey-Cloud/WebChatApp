@@ -35,7 +35,7 @@ const api = (token) => {
     )
   )
 
-  const del = (url) =>{
+  const del = (url) =>(
     fetch(
       baseUrl + url,
       {
@@ -43,7 +43,7 @@ const api = (token) => {
         headers,
       }
     )
-  }
+  )
 
   const postForm = (url, body) => (
     fetch(
