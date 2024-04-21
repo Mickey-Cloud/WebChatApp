@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { useApi, useUser } from "../hooks";
 
 function DetailsContainer({chatId, }){
+  const api = useApi();
   const user = useUser();
   const [is_owner, isOwner] = useState(false);
   const [owner_id, Owner] = useState("");
@@ -13,7 +14,7 @@ function DetailsContainer({chatId, }){
   const { data } = useQuery({
     queryKey,
     queryFn: () => (
-      fetch(`http://127.0.0.1:8000/chats/${chatId}?include=users`)
+      api.get(`/chats/${chatId}?include=users`)
         .then((response) => response.json())
     ),
   });
@@ -31,8 +32,8 @@ function DetailsContainer({chatId, }){
     return (
       <div className="flex flexbox justify-center">
         <div className="min-w-96">
-          <ChatNameContainer overallName={data.chat.name} queryClient={queryClient} chatId={chatId} isOwner={is_owner}/>
-          <UserListContainer members={data.users} queryClient={queryClient} chatId={chatId} isOwner={is_owner} ownerId={owner_id}/>
+          <ChatNameContainer overallName={data.chat.name} queryClient={queryClient} chatId={chatId} isOwner={is_owner} api={api}/>
+          <UserListContainer members={data.users} queryClient={queryClient} chatId={chatId} isOwner={is_owner} ownerId={owner_id} api={api}/>
         </div>
       </div>
     )
@@ -40,8 +41,7 @@ function DetailsContainer({chatId, }){
   return (<div>loading...</div>)
 }
 
-function ChatNameContainer({overallName, queryClient, chatId, isOwner}){
-  const api = useApi();
+function ChatNameContainer({overallName, queryClient, chatId, isOwner, api}){
   const [name, setName] = useState("");
   const mutation = useMutation({
     mutationFn: () => (
@@ -76,8 +76,7 @@ function ChatNameContainer({overallName, queryClient, chatId, isOwner}){
   )
 }
 
-function UserListContainer({members, queryClient, chatId, isOwner, ownerId}){
-  const api = useApi();
+function UserListContainer({members, queryClient, chatId, isOwner, ownerId, api}){
   const [newMember_id, setMemberID] = useState("");
   const [removeMember_id, removeMemberID] = useState("");
 

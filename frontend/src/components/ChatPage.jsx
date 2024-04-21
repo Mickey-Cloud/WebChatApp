@@ -1,7 +1,7 @@
 import { useQuery } from "react-query";
-import { Link, NavLink, useParams } from "react-router-dom";
-import { useEffect, useRef } from "react";
+import { NavLink, useParams } from "react-router-dom";
 import { useUser } from "../context/user";
+import { useApi } from "../hooks";
 import ScrollContainer from "./ScrollContainer"
 import LeftNav from "./LeftNav";
 import NewMessage from "./NewMessage";
@@ -73,10 +73,12 @@ function ChatCardContainer({ messages, chatId }) {
 }
 
 function ChatCardQueryContainer({ chatId,  }) {
+  const api = useApi();
+
   const { data } = useQuery({
     queryKey: ["chats", chatId],
     queryFn: () => (
-      fetch(`http://127.0.0.1:8000/chats/${chatId}/messages`)
+      api.get(`/chats/${chatId}/messages`)
         .then((response) => response.json())
     ),
   });

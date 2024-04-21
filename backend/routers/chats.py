@@ -34,12 +34,13 @@ chats_router = APIRouter(prefix="/chats", tags=["Chats"])
 @chats_router.get("", response_model=ChatCollection)
 def get_chats(
     sort: Literal["name", "id", "created_at"] = "name",
+    user: UserInDB = Depends(get_current_user),
     session: Session = Depends(db.get_session)
     ):
     """Gets all the chats"""
     
     sort_key = lambda chat: getattr(chat, sort)
-    chatList = db.get_chats(session)
+    chatList = db.get_chats(session, user)
     chats = chatsInDB_to_chats(chatList=chatList)
     return ChatCollection(
         meta={"count": len(chats)},
@@ -52,11 +53,12 @@ def get_chats(
 def get_chat(
     chat_id: int,
     include: list[str] = Query(None),
+    user: UserInDB = Depends(get_current_user),
     session: Session = Depends(db.get_session)
     ):
     """Get a chat for a given ID."""
     
-    chat = db.get_chat_by_id(session, chat_id)
+    chat = db.get_chat_by_id(session, chat_id, user.id)
     if include != None :
         if(include.__contains__("messages")):
             messages = from_MessagesInDB_to_Messages(chat.messages)
@@ -143,12 +145,13 @@ def update_chat(
 def get_chat_messages(
     chat_id: int,
     sort: Literal["id", "user_id", "created_at"] = "created_at",
+    user: UserInDB = Depends(get_current_user),
     session: Session = Depends(db.get_session)
     ):
     """Gets all the messages pertaining to a specific Chat"""
     
     sort_key = lambda message: getattr(message, sort)
-    messages = db.get_messages_by_chat_id(session, chat_id)
+    messages = db.get_messages_by_chat_id(session, chat_id, user.id)
     return MessageCollection(
         meta={"count": len(messages)},
         messages=sorted(messages, key=sort_key),
@@ -158,12 +161,13 @@ def get_chat_messages(
 def get_users_in_chat(
     chat_id: int,
     sort: Literal["id", "created_at"] = "id",
+    user: UserInDB = Depends(get_current_user),
     session: Session = Depends(db.get_session)
     ):
     """Gets all the Users associated with the specific chat"""
     
     sort_key = lambda user: getattr(user, sort)
-    users = db.get_chat_users(session, chat_id)
+    users = db.get_chat_users(session, chat_id, user.id)
     return UserCollection(
         meta ={"count": len(users)},
         users=sorted(users, key=sort_key)
@@ -179,6 +183,45 @@ def post_message_to_chat(
     """Adds a message to the chat by the currently logged in user"""
     
     return MessageResponse(message = db.post_message(session, chat_id, user.id, new_message.text))
+
+@chats_router.put("/{chat_id}/messages/{message_id}", response_model=MessageResponse)
+def put_message_in_chat(
+    new_message: MessageNew,
+    chat_id: int,
+    message_id: int,
+    user: UserInDB = Depends(get_current_user),
+    session: Session = Depends(db.get_session)
+):
+    """Updates a message in the chat
+
+    Args:
+        new_message (MessageNew): Text to update the chat
+        chat_id (int): Id of the chat to update
+        message_id (int): id of the message to update
+
+    Returns:
+        MessageResponse: The updated Message
+    """
+    return MessageResponse(message = db.put_message(session, chat_id, message_id, new_message, user.id))
+
+@chats_router.delete("/{chat_id}/messages/{message_id}", response_model=None, status_code=204)
+def delete_message(
+    chat_id: int,
+    message_id: int,
+    user: UserInDB = Depends(get_current_user),
+    session: Session = Depends(db.get_session)
+):
+    """Deletes a message from the chat
+
+    Args:
+        chat_id (int): Id of the chat the message is within
+        message_id (int): Id of the message to delete
+
+    Returns:
+        None
+    """
+    
+    db.delete_message(session, chat_id, message_id, user.id)
 
 @chats_router.post("", response_model=ChatResponseSm, status_code=201)
 def post_create_chat(

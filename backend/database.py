@@ -2,7 +2,7 @@ from datetime import datetime
 
 from fastapi import HTTPException
 
-from sqlmodel import Session, SQLModel, create_engine, select
+from sqlmodel import Session, SQLModel, create_engine, select, any_
 
 from backend.helpers import(
     from_MessagesInDB_to_Messages,
@@ -65,6 +65,30 @@ class NoPermissionChat(PermissionException):
             status_code=403,
             error="no_permission",
             description="requires permission to edit chat"
+        )
+        
+class NoPermissionViewChat(PermissionException):
+    def __init__(self):
+        super().__init__(
+            status_code=403,
+            error="no_permission",
+            description="requires permission to view chat"
+        )
+        
+class NoPermissionDeleteMessage(PermissionException):
+    def __init__(self):
+        super().__init__(
+            status_code=403,
+            error="no_permission",
+            description="requires permission to delete Message"
+        )
+
+class NoPermissionMessage(PermissionException):
+    def __init__(self):
+        super().__init__(
+            status_code=403,
+            error="no_permission",
+            description="requires permission to edit Message"
         )
         
 class NoPermissionChatMembers(PermissionException):
@@ -148,16 +172,21 @@ def get_user_chats(session: Session, user_id: int) -> ChatCollection:
 
 # ----------------- Chats --------------------- #
 
-def get_chats(session: Session) -> ChatCollection:
+def user_is_member(chat: ChatInDB, user_id: int):
+    if(not(any(user.id == user_id for user in chat.users))):
+        raise NoPermissionViewChat()
+
+def get_chats(session: Session, user: UserInDB) -> ChatCollection:
     """
     Retrieves a list of all the chats
     
     Returns:
         ChatCollection: a chat collection in the chat response format
     """
-    return session.exec(select(ChatInDB)).all()
+    
+    return session.exec(select(ChatInDB).where(ChatInDB.users.any(id = user.id)))
 
-def get_chat_by_id(session: Session, chat_id: int) -> ChatInDB:
+def get_chat_by_id(session: Session, chat_id: int, user_id:int) -> ChatInDB:
     """
     Retrieve an chat from the database.
     
@@ -165,6 +194,7 @@ def get_chat_by_id(session: Session, chat_id: int) -> ChatInDB:
     :return: the retrieved chat
     """
     chat = session.get(ChatInDB, chat_id)
+    user_is_member(chat, user_id)
     if chat:
         return chat
 
@@ -205,7 +235,7 @@ def put_chat_name_update(session: Session, chat_id: int, owner_id: int, chat_upd
         chat_id (str): the chat to be updated
         chat_update (ChatUpdate): the name to update in the chat
     """
-    chat = get_chat_by_id(session, chat_id)
+    chat = get_chat_by_id(session, chat_id, owner_id)
     if(chat.owner.id != owner_id):
         raise NoPermissionChat()
     for key, value in chat_update:
@@ -221,21 +251,7 @@ def put_chat_name_update(session: Session, chat_id: int, owner_id: int, chat_upd
         created_at=chat.created_at
     )
 
-def delete_chat(session: Session, chat_id: int):
-    """
-    Deletes a chat based off the given ID
-
-    Args:
-        chat_id (str): ID of the chat to be deleted
-    Raises:
-        Entity Not found exception if
-    """
-    
-    chat = get_chat_by_id(session, chat_id)
-    session.delete(chat)
-    session.commit()
-
-def get_messages_by_chat_id(session: Session, chat_id: int) -> list[Message]:
+def get_messages_by_chat_id(session: Session, chat_id: int, user_id: int) -> list[Message]:
     """
     Get all the messages for a given chat ID
 
@@ -243,11 +259,11 @@ def get_messages_by_chat_id(session: Session, chat_id: int) -> list[Message]:
         chat_id (str): The ID of the Chat to receive the messages for
     """
     
-    chat = get_chat_by_id(session, chat_id)
+    chat = get_chat_by_id(session, chat_id, user_id)
     messages = from_MessagesInDB_to_Messages(chat.messages)
     return messages
 
-def get_chat_users(session: Session, chat_id: int) -> list[UserInDB]:
+def get_chat_users(session: Session, chat_id: int, user_id: int) -> list[UserInDB]:
     """
     Get all the users associated with the particular chat
 
@@ -257,7 +273,7 @@ def get_chat_users(session: Session, chat_id: int) -> list[UserInDB]:
         404 EntityNotFoundException if the given chat is not found
     """
     
-    chat = get_chat_by_id(session, chat_id)
+    chat = get_chat_by_id(session, chat_id, user_id)
     
     users = chat.users
     return users
@@ -273,7 +289,7 @@ def put_new_chat_user(session: Session, chat_id: int, user_id: int, owner_id:int
     Returns:
         UserCollection: A list of all the users that belong to the chat
     """
-    chat = get_chat_by_id(session,chat_id)
+    chat = get_chat_by_id(session,chat_id, owner_id)
     if(chat.owner.id != owner_id):
         raise NoPermissionChatMembers()
     get_user_by_id(session,user_id)
@@ -305,7 +321,7 @@ def delete_user_chat_link(session: Session, chat_id: int, user_id: int, owner_id
     Returns:
         UserCollection: a collection of all the users left in the chat
     """
-    chat = get_chat_by_id(session,chat_id)
+    chat = get_chat_by_id(session,chat_id, owner_id)
     if(chat.owner.id != owner_id):
         raise NoPermissionChatMembers()
     if(user_id == owner_id):
@@ -339,7 +355,7 @@ def post_message(session: Session, chat_id: int, user_id: int, text: str) -> Mes
     Raises:
         EntityNotFound: The chat to add the message to does not exist.
     """
-    get_chat_by_id(session, chat_id)
+    get_chat_by_id(session, chat_id, user_id)
     message = MessageInDB(
         text=text,
         user_id=user_id,
@@ -351,3 +367,57 @@ def post_message(session: Session, chat_id: int, user_id: int, text: str) -> Mes
     session.refresh(message)
     
     return messageInDB_to_Message(message)
+
+def get_message_by_id(session: Session, chat_id: int, message_id: int) -> MessageInDB:
+    """Gets the message by id
+
+    Args:
+        chat_id (int): Id of the chat we are looking in for the message
+        message_id (int): Id of the message within the chat
+    """
+    
+    result = session.exec(select(MessageInDB).where((MessageInDB.id == message_id) & (MessageInDB.chat_id == chat_id)))
+    message = result.first()
+    if(message == None):
+        raise EntityNotFoundException()
+    return message
+    
+
+def put_message(session: Session, chat_id: int, message_id: int, new_message: str, user_id: int) -> Message:
+    """Edits a message in the chat
+
+    Args:
+        chat_id (int): Id of the chat where the message resides
+        message_id (int): Id of the message to update
+        new_message (str): Text that will be in the new message
+        user_id (int): Id of the logged in user - owner of that message
+    """
+    
+    message = get_message_by_id(session, chat_id, message_id)
+    
+    if(message.user.id != user_id):
+        raise NoPermissionMessage()
+    
+    message.text = new_message
+    session.add(message)
+    session.commit()
+    session.refresh(message)
+    
+    return messageInDB_to_Message(message)
+
+def delete_message(session: Session, chat_id: int, message_id: int, user_id: int) -> None:
+    """Deletes a message from the chat
+
+    Args:
+        chat_id (int): Id of the chat that the message is within
+        message_id (int): Id of the message to delete
+        user_id (int): Id of the owner of the message
+    """
+    
+    message = get_message_by_id(session, chat_id, message_id)
+    
+    if(message.user.id != user_id):
+        raise NoPermissionDeleteMessage()
+    
+    session.delete(message)
+    session.commit()

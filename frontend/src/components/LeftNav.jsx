@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useQuery } from "react-query";
 import { useRef } from "react";
+import { useApi } from "../hooks";
 
 const emptyChat = (id) => ({
   id,
@@ -32,12 +33,13 @@ function Link({ chat }) {
 }
 
 function LeftNav() {
+  const api = useApi();
   const [search, setSearch] = useState("");
 
   const { data } = useQuery({
     queryKey: ["chats"],
     queryFn: () => (
-      fetch("http://127.0.0.1:8000/chats")
+      api.get("/chats")
         .then((response) => response.json())
     ),
   });
