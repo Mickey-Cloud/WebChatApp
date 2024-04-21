@@ -80,7 +80,7 @@ class NoPermissionDeleteMessage(PermissionException):
         super().__init__(
             status_code=403,
             error="no_permission",
-            description="requires permission to delete Message"
+            description="requires permission to delete message"
         )
 
 class NoPermissionMessage(PermissionException):
@@ -88,7 +88,7 @@ class NoPermissionMessage(PermissionException):
         super().__init__(
             status_code=403,
             error="no_permission",
-            description="requires permission to edit Message"
+            description="requires permission to edit message"
         )
         
 class NoPermissionChatMembers(PermissionException):
