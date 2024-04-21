@@ -59,7 +59,7 @@ const api = (token) => {
     )
   );
 
-  return { get, post, put, del, postForm };
+  return { get, post, put, del, postForm};
 };
 
 export default api;

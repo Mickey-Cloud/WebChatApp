@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQueryClient, useQuery } from "react-query";
 import { useParams } from "react-router-dom";
 import { useApi, useUser } from "../hooks";
@@ -122,7 +122,7 @@ function UserListContainer({members, queryClient, chatId, isOwner, ownerId, api}
   const { data } = useQuery({
     queryKey: ["users"],
     queryFn: () => (
-      fetch(`http://127.0.0.1:8000/users`)
+      api.get(`/users`)
         .then((response) => response.json())
     ),
   });

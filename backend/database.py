@@ -295,7 +295,7 @@ def put_new_chat_user(session: Session, chat_id: int, user_id: int, owner_id:int
     get_user_by_id(session,user_id)
     result = session.exec(select(UserChatLinkInDB).where((UserChatLinkInDB.user_id == user_id) & (UserChatLinkInDB.chat_id == chat_id)))
     if(result.first() != None):
-        usersInChat = get_chat_users(session, chat_id)
+        usersInChat = get_chat_users(session, chat_id, owner_id)
         return UserCollection(
             meta={"count": len(usersInChat)},
             users=usersInChat
@@ -304,7 +304,7 @@ def put_new_chat_user(session: Session, chat_id: int, user_id: int, owner_id:int
     session.add(link)
     session.commit()
     session.refresh(link)
-    usersInChat = get_chat_users(session, chat_id)
+    usersInChat = get_chat_users(session, chat_id, owner_id)
     return UserCollection(
         meta={"count": len(usersInChat)},
         users=usersInChat
@@ -332,7 +332,7 @@ def delete_user_chat_link(session: Session, chat_id: int, user_id: int, owner_id
     if(link != None):
         session.delete(link)
         session.commit()
-    usersInChat = get_chat_users(session, chat_id)
+    usersInChat = get_chat_users(session, chat_id, owner_id)
     return UserCollection(
         meta={"count": len(usersInChat)},
         users=usersInChat

@@ -202,7 +202,7 @@ def put_message_in_chat(
     Returns:
         MessageResponse: The updated Message
     """
-    return MessageResponse(message = db.put_message(session, chat_id, message_id, new_message, user.id))
+    return MessageResponse(message = db.put_message(session, chat_id, message_id, new_message.text, user.id))
 
 @chats_router.delete("/{chat_id}/messages/{message_id}", response_model=None, status_code=204)
 def delete_message(
